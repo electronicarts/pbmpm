@@ -1,0 +1,84 @@
+::-webkit-scrollbar {
+    width:10px;
+}
+
+::-webkit-scrollback-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+
+input[type="range"]::-webkit-slider-runnable-track {
+    background: #555;
+}
+
+.input {
+    color:white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.inputCombo {
+    background-color: #555;
+    color:white;
+
+}
+
+.collapsible {
+    background-color: #eee;
+    color: #444;
+    cursor:pointer;
+    padding:18px;
+    margin-bottom:5px;
+    width:100%;
+    border:none;
+    text-align:left;
+    outline:none;
+    font-size:15px;
+}
+
+.active, .collapsible:hover {
+    background-color: #ccc;
+  }
+
+.sectionContent {
+    padding: 0 18px;
+    display: none;
+    overflow:hidden;
+}
+
+.uiPanel {
+    position: absolute;
+    width:20%;
+    height:100%;
+    transition: left 0.05s;
+}
+
+.uiButton {
+    border-style: none;
+    background-color:rgba(23, 27, 36, 0.8); 
+    color:white; 
+    position:absolute; 
+    width:40px;
+    height:100px;
+    top:10%;
+    left:100%;
+    border-radius: 0 10px 10px 0;
+}
+
+.uiButton:hover {
+    border-color:#888;
+    border-left: 0;
+    border-style:solid
+}
+
+.uiText {
+    font-size:20px;
+    text-align:center;
+    transform:rotate(-90deg) translate(-20px, 0);
+}

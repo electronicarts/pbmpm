@@ -1,0 +1,54 @@
+ <!DOCTYPE html>
+ <html>
+ <head>
+   <title>Home</title>
+
+ </head>
+
+ <body id="body" style="background-image:linear-gradient(217deg, rgb(1, 4, 30), rgb(10, 3, 1) 50%); margin:0; width: 100vw; height:100vh;">
+  <main id="main">
+    <link rel="stylesheet" href="style.css">
+    <canvas id='canvas' style=" position:absolute;"></canvas>
+    <canvas id='vectorCanvas' style="position:absolute;"></canvas>
+    <div id="ui" class="uiPanel" style="display:none">
+
+    <div id='uiPanel' style="height:100%" >
+      <button id="settingsTabButton" style="position: absolute; height:5%; width:33.3%">Settings</button>
+      <button id="shapesTabButton" style="position: absolute; height:5%; left:33.33%; width:33.3%">Shapes</button>
+      <button id="performanceTabButton" style="position: absolute; left:66.66%; height:5%; width:33.3%">Stats</button>
+      
+      <div id="settingsTabContent" style="position:absolute; top:5%; height:95%; width:100%;">
+      <form id="uiContainer" style="height:100%; width:100%;  background-color:rgba(23, 27, 36, 0.8);  overflow:auto;">
+        <!-- Automatically generated UI goes here -->
+      </form>
+      </div>
+
+      <div id="shapesTabContent" style="position:absolute; top:5%; height:95%; width:100%; display:none; background-color:rgba(23, 27, 36, 0.8);  overflow:auto;">
+        <button id="saveSceneButton" class="inputCombo">Save Scene</button>
+        <button id="loadSceneButton" class="inputCombo">Load Scene</button> 
+        <div id="shapesList">
+
+        </div>
+      </div>
+
+      <div id="performanceTabContent" style="position:absolute; top:5%; height:95%; width:100%; display:none; background-color:rgba(23, 27, 36, 0.8);  overflow:auto;">
+        <output class='input' id="timingStats">Timing stats are not available.</output><br>
+        <output class='input' id="speedStats"></output><br>
+        <output class='input' id="gridStats"></output><br>
+        <output class='input' id="particleStats">Particle count is not available.</output>
+      </div>
+
+      <button id="uiButton" class="uiButton"><div class="uiText">Controls</div></button>
+    </div>
+
+  </div>
+
+   <script type="module" src="src/main.js"></script>
+  </main>
+  <div id="loadingContainer"  style="display:flex; justify-content:center; align-items:center; flex-direction:column; height:100%">
+    <img id="loadingAnimation" src="data/SEED_inverted.png" style="width:380px"/>
+    <h1 id='loadingText' style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color:aliceblue; text-align:left; width:300px; margin-left:170px">Loading...</h1>
+    <h2 id='errorText' style="text-align:center"></h1>
+  </div>
+  </body>
+ </html>

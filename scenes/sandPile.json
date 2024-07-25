@@ -1,0 +1,26 @@
+{
+    "version": 1,
+    "resolution": [
+        1920,
+        953
+    ],
+    "shapes": [
+        {
+            "id": "shape1",
+            "position": {
+                "x": 955.3963963963963,
+                "y": 563
+            },
+            "halfSize": {
+                "x": "319",
+                "y": "283"
+            },
+            "rotation": 0,
+            "shape": "0",
+            "function": "3",
+            "emitMaterial": "2",
+            "emissionRate": "5.3",
+            "radius": 24.01200900750657
+        }
+    ]
+}

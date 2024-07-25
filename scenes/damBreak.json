@@ -1,0 +1,128 @@
+{
+    "version": 1,
+    "resolution": [
+        1530,
+        863
+    ],
+    "shapes": [
+        {
+            "id": "shape1",
+            "position": {
+                "x": 383.90990990990986,
+                "y": 429.86149003147955
+            },
+            "halfSize": {
+                "x": "354",
+                "y": "407"
+            },
+            "rotation": 0,
+            "shape": "0",
+            "function": "3",
+            "emitMaterial": "0",
+            "emissionRate": "6.2",
+            "radius": 20.174784316989175
+        },
+        {
+            "id": "shape2",
+            "position": {
+                "x": 962.9099099099099,
+                "y": 525.8614900314795
+            },
+            "halfSize": {
+                "x": "80",
+                "y": "80"
+            },
+            "rotation": 0,
+            "shape": "0",
+            "function": "3",
+            "emitMaterial": "1",
+            "emissionRate": "6.2",
+            "radius": 20.174784316989175
+        },
+        {
+            "id": "shape3",
+            "position": {
+                "x": 1165.9099099099099,
+                "y": 523.8614900314795
+            },
+            "halfSize": {
+                "x": "80",
+                "y": "80"
+            },
+            "rotation": 0,
+            "shape": "0",
+            "function": "3",
+            "emitMaterial": "1",
+            "emissionRate": "6.2",
+            "radius": 20.174784316989175
+        },
+        {
+            "id": "shape4",
+            "position": {
+                "x": 1364.9099099099099,
+                "y": 529.8614900314795
+            },
+            "halfSize": {
+                "x": "80",
+                "y": "80"
+            },
+            "rotation": 0,
+            "shape": "0",
+            "function": "3",
+            "emitMaterial": "1",
+            "emissionRate": "6.2",
+            "radius": 20.174784316989175
+        },
+        {
+            "id": "shape5",
+            "position": {
+                "x": 1061.9099099099099,
+                "y": 348.86149003147955
+            },
+            "halfSize": {
+                "x": "80",
+                "y": "80"
+            },
+            "rotation": 0,
+            "shape": "0",
+            "function": "3",
+            "emitMaterial": "1",
+            "emissionRate": "6.2",
+            "radius": 20.174784316989175
+        },
+        {
+            "id": "shape6",
+            "position": {
+                "x": 1253.9099099099099,
+                "y": 346.86149003147955
+            },
+            "halfSize": {
+                "x": "80",
+                "y": "80"
+            },
+            "rotation": 0,
+            "shape": "0",
+            "function": "3",
+            "emitMaterial": "1",
+            "emissionRate": "6.2",
+            "radius": 20.174784316989175
+        },
+        {
+            "id": "shape7",
+            "position": {
+                "x": 1157.9099099099099,
+                "y": 167.86149003147955
+            },
+            "halfSize": {
+                "x": "80",
+                "y": "80"
+            },
+            "rotation": 0,
+            "shape": "0",
+            "function": "3",
+            "emitMaterial": "1",
+            "emissionRate": "6.2",
+            "radius": 20.174784316989175
+        }
+    ]
+}
