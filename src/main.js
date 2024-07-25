@@ -457,8 +457,6 @@ function loadScene(json)
 
         ui.g_simShapes.add(shape);
     }
-
-    console.log(ui.g_simShapes);
 }
 
 async function loadSceneFromUrl(url)
