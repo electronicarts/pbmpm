@@ -60,8 +60,6 @@ fn csMain( @builtin(global_invocation_id) id: vec3<u32> )
     }
     else if(particle.material == MaterialSand)
     {
-
-
         let F =  (Identity + particle.deformationDisplacement) * particle.deformationGradient;
 
         var svdResult = svd(F);

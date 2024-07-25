@@ -8,12 +8,8 @@ import * as shader from "./shader.js"
 
 let context = {
     pipelines: {},
-    maxParticleCount: 500000,
-    maxConstraintData: 100000,
-    // Note - not necessary to have these set dynamically
-    hashGridBucketCount: 100*1024,
-    hashGridBucketSize: 128,
-    maxNeighbourCount: 64,
+    maxParticleCount: 1000000,
+
     maxTimeStampCount: 2048,
 
     encoder: null,
@@ -90,36 +86,6 @@ export function resetBuffers()
         size: context.maxParticleCount * 4,
         usage: GPUBufferUsage.STORAGE
     });
-
-    // Data needed for Position Based Fluids impl
-    {
-        // Extra particle buffer required for ping-pong access
-        context.tempParticleBuffer = context.device.createBuffer({
-            label: 'tempParticles',
-            size: context.maxParticleCount * 4 * particleFloatCount,
-            usage: GPUBufferUsage.STORAGE
-        });
-
-        // Each bucket has one count
-        context.hashGridBucketCounts = context.device.createBuffer({
-            label: "hashGridBucketCounts",
-            size: context.hashGridBucketCount * 4,
-            usage: GPUBufferUsage.STORAGE
-        });
-
-        // Each bucket has hashGridBucketSize elements of 2 4-byte words
-        context.hashGridData = context.device.createBuffer({
-            label: "hashGridData",
-            size: context.hashGridBucketCount * context.hashGridBucketSize * 2 * 4,
-            usage: GPUBufferUsage.STORAGE
-        });
-
-        context.particleNeighbours = context.device.createBuffer({
-            label: 'particleNeighbours',
-            size: context.maxParticleCount * 4 * context.maxNeighbourCount,
-            usage: GPUBufferUsage.STORAGE
-        });
-    }
 }
 
 export function beginFrame()
@@ -194,7 +160,6 @@ export function computeDispatch(shaderName, resources, groupCount)
         layout: pipeline.getBindGroupLayout(0),
         entries: entries});
 
-    // 
     const computePass = context.encoder.beginComputePass({
         label: shaderName,
         ...(context.canTimeStamp && {

@@ -91,7 +91,6 @@ const g_uiElements =
     {type: Checkbox, name: 'useGridVolumeForLiquid', desc: 'Use Grid Volume for Liquid', default: true},
     {type: Range, name: 'fixedPointMultiplierExponent', desc: 'log10(Fixed Point Multiplier)', default: 7, min: 3, max: 10, step: 1},
     {type: Range, name: 'gravityStrength', desc: 'Gravity Strength', default: 2.5, min: 0, max: 5, step: 0.01},
-    {type: Range, name: 'liquidTargetDensity', desc: 'Liquid Target Density', default: 1, min: 0.1, max: 16, step: 0.01},
     {type: Range, name: 'liquidViscosity', desc: 'Liquid Viscosity', default: 0.01, min: 0, max: 1, step: 0.01},
     {type: Combo, name: 'mouseFunction', desc: 'Mouse Interaction', default:SimEnums.MouseFunctionGrab, values:[
         {desc:'Grab', value: SimEnums.MouseFunctionGrab},
@@ -102,10 +101,8 @@ const g_uiElements =
     {type: Range, name: 'elasticityRatio', desc: 'Elasticity Ratio', default: 1, min: 0, max: 1, step: 0.01},
     {type: Range, name: 'liquidRelaxation', desc: 'Liquid Relaxation', default: 2, min: 0, max: 10, step: 0.01},
     {type: Range, name: 'elasticRelaxation', desc: 'Elastic Relaxation', default: 1.5, min: 0, max: 10, step: 0.01},
-    {type: Range, name: 'frictionAngle', desc: 'Friction Angle', default: 30, min: 0, max: 45, step: 0.1},
-    {type: Range, name: 'cohesion', desc: 'Cohesion', default: 0, min: 0, max: 2, step: 0.01},
-    {type: Range, name: 'beta', desc: 'Beta', default: 1, min: 0, max: 100, step: 0.01},
-    {type: Range, name: 'plasticity', desc: 'Plasticity', default: 0, min: 0, max: 1, step: 0.01},
+    {type: Range, name: 'frictionAngle', desc: 'Sand Friction Angle', default: 30, min: 0, max: 45, step: 0.1},
+    {type: Range, name: 'plasticity', desc: 'Visco Plasticity', default: 0, min: 0, max: 1, step: 0.01},
 
     {type: Combo, name: 'renderMode', desc: 'Render Mode', values:[
         {value: RenderEnums.RenderModeStandard, desc: 'Standard'},

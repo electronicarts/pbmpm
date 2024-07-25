@@ -74,7 +74,6 @@ export function init(insertHandlers)
     simFactory.add('particlesPerCellAxis', buffer_factory.u32);
 
     simFactory.add('frictionAngle', buffer_factory.f32);
-    simFactory.add('beta', buffer_factory.f32);
     simFactory.add('plasticity', buffer_factory.f32);
     simFactory.add('mouseRadius', buffer_factory.f32);
 

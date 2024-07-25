@@ -69,7 +69,7 @@ fn csMain( @builtin(global_invocation_id) id: vec3<u32> )
             // https://doi.org/10.1145/2897824.2925906
             let sinPhi = sin(g_simConstants.frictionAngle/180.0 * 3.14159);
             let alpha = sqrt(2.0/3.0)*2.0*sinPhi/(3.0 - sinPhi);
-            let beta = g_simConstants.beta;
+            let beta = 0.5;
 
             let eDiag = log(max(abs(svdResult.Sigma), vec2f(1e-6)));
 
