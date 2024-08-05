@@ -335,22 +335,7 @@ export function update(inputs, uiIsHidden)
         }
     
     
-        // Set mouse cursor
-        if(g_mouseOverObject)
-        {
-            if(g_mouseOverZone === 'translation')
-            {   
-                g_vectorCanvas.style.cursor = g_dragging? 'grabbing' : 'grab';
-            }
-            else if(g_mouseOverZone === 'rotation')
-            {   
-                g_vectorCanvas.style.cursor = 'url("./data/rotate.svg") 16 16, pointer';
-            }
-        }
-        else
-        {
-            g_vectorCanvas.style.cursor = 'auto';
-        }
+
     
 
     
@@ -417,8 +402,29 @@ export function update(inputs, uiIsHidden)
             }
         }
     }
+    else
+    {
+        g_mouseOverObject = undefined;
+        g_grabbedObject = undefined;
+        g_dragging = false;
+    }
 
-    
+    // Set mouse cursor
+    if(g_mouseOverObject)
+    {
+        if(g_mouseOverZone === 'translation')
+        {   
+            g_vectorCanvas.style.cursor = g_dragging? 'grabbing' : 'grab';
+        }
+        else if(g_mouseOverZone === 'rotation')
+        {   
+            g_vectorCanvas.style.cursor = 'url("./data/rotate.svg") 16 16, pointer';
+        }
+    }
+    else
+    {
+        g_vectorCanvas.style.cursor = 'auto';
+    }
 
     if(inputs.isMouseDown)
     {
