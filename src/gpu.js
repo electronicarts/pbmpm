@@ -64,14 +64,11 @@ export function construct4IntBuffer(name, usage, values)
 
 export function resetBuffers(gridSize)
 {
-    // Constructs a buffer containing 4 integers of the given values
-
     // Construct various small buffers used for indirect dispatch, counting and staging
     context.particleCountBuffer = construct4IntBuffer('particleCountBuffer', GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC, [0,0,0,0]);
     context.particleCountStagingBuffer = construct4IntBuffer('particleCountStagingBuffer', GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST, [0,0,0,0]);
     context.particleRenderDispatchBuffer = construct4IntBuffer('particleRenderDispatchBuffer', GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.INDIRECT, [6,0,0,0]);
     context.particleSimDispatchBuffer = construct4IntBuffer('particleSimDispatchBuffer', GPUBufferUsage.STORAGE | GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_DST, [0,1,1,0]);
-    context.particleFreeCountBuffer = construct4IntBuffer('particleFreeCountBuffer', GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST, [0,0,0,0]);
     context.particleFreeCountStagingBuffer = construct4IntBuffer('particleFreeCountStagingBuffer', GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST, [0,0,0,0]);
 
     // Construct particle buffer.
@@ -86,24 +83,20 @@ export function resetBuffers(gridSize)
 
     context.particleFreeIndicesBuffer = context.device.createBuffer({
         label: 'freeIndices',
-        size: context.maxParticleCount * 4,
-        usage: GPUBufferUsage.STORAGE
+        size: 4 + context.maxParticleCount * 4,
+        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
     });
 
-    context.gridBuffer = context.device.createBuffer({
-        label: "gridBuffer",
-        size: gridSize[0] * gridSize[1] * 4 * 4,
-        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
-    });
+    context.gridBuffers = [];
 
-    context.gridBufferTmp = context.device.createBuffer({
-        label: "gridBufferTmp",
-        size: gridSize[0] * gridSize[1] * 4 * 4,
-        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC
-    });
-
-    console.log(context.gridBuffer);
-    console.log(context.gridBufferTmp)
+    for(let i = 0; i < 3; ++i)
+    {
+        context.gridBuffers.push(context.device.createBuffer({
+            label: `gridBuffer${i}`,
+            size: gridSize[0] * gridSize[1] * 4 * 4,
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+        }));
+    }
 }
 
 export function beginFrame()
@@ -126,7 +119,7 @@ export function endFrame()
 
     if(canReadbackParticleFreeCount)
     {
-        context.encoder.copyBufferToBuffer(context.particleFreeCountBuffer, 0, context.particleFreeCountStagingBuffer, 0, 4);
+        context.encoder.copyBufferToBuffer(context.particleFreeIndicesBuffer, 0, context.particleFreeCountStagingBuffer, 0, 4);
     }
 
     if(canReadbackTimeStamps)
@@ -165,24 +158,70 @@ export function computeDispatch(shaderName, resources, groupCount)
     // Construct array of resources in the required format for
     // creating a bind group
     let entries = []
+
+    var isSimpleFlatBufferList = true;
+    var isNestedBufferList = true;
     for(let i = 0; i < resources.length; ++i)
     {
         if(!resources[i])
         {
             throw `Compute Dispatch [${shaderName}]: Resource at index ${i} was falsy!`
         }
+        if(!(resources[i] instanceof GPUBuffer))
+        {
+            isSimpleFlatBufferList = false;
+        }
+        if(Array.isArray(resources[i]))
+        {
+            for(let j = 0; j < resources[i].length; ++j)
+            {
+                if(!resources[i][j])
+                {
+                    throw `Compute Dispatch [${shaderName}]: Resource at group ${i} index ${j} was falsy!`
+                }
+                if(!(resources[i][j] instanceof GPUBuffer))
+                {
+                    isNestedBufferList = false;
+                }
+            }
+        }
+    }
 
-        entries.push({binding: i, resource: {buffer: resources[i]}});
+    if(!isSimpleFlatBufferList && !isNestedBufferList)
+    {
+        throw `Expected resources to be an array of resources OR an array of arrays of resources.`;
+    }
+
+    if(isSimpleFlatBufferList)
+    {
+        entries.push([])
+        for(let i = 0; i < resources.length; ++i)
+        {
+            entries[0].push({binding: i, resource: {buffer: resources[i]}});
+        }
+    }
+    else if(isNestedBufferList)
+    {
+        for(let i = 0; i < resources.length; ++i)
+        {
+            let thisGroupEntries = []
+    
+            for(let j = 0; j < resources[i].length; ++j)
+            {
+                if(!resources[i][j])
+                {
+                    throw `Compute Dispatch [${shaderName}]: Resource at group ${i} index ${j} was falsy!`
+                }
+        
+                thisGroupEntries.push({binding: j, resource: {buffer: resources[i][j]}});
+            }
+    
+            entries.push(thisGroupEntries);
+        }
     }
 
     const pipeline = shader.getComputePipeline(shaderName);
     
-
-    // Create bind group
-    const bindGroup = context.device.createBindGroup({
-        layout: pipeline.getBindGroupLayout(0),
-        entries: entries});
-
     const computePass = context.encoder.beginComputePass({
         label: shaderName,
         ...(context.canTimeStamp && {
@@ -193,9 +232,15 @@ export function computeDispatch(shaderName, resources, groupCount)
             }
         })
     });
-
     computePass.setPipeline(pipeline);
-    computePass.setBindGroup(0, bindGroup);
+
+    for(let i = 0; i < entries.length; ++i)
+    {
+        const bindGroup = context.device.createBindGroup({
+            layout: pipeline.getBindGroupLayout(0),
+            entries: entries[i]});
+        computePass.setBindGroup(i, bindGroup);
+    }
 
     if(Array.isArray(groupCount))
     {

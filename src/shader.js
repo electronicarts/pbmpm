@@ -7,8 +7,6 @@
 export let Shaders = {
 
     // MPM  shaders
-    mpmParticleIntegrate: 'particleIntegrate',
-
     g2p2g: 'g2p2g',
 
     // Bukkitizing shaders

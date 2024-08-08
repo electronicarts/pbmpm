@@ -13,8 +13,7 @@
 @group(0) @binding(1) var<storage, read_write> g_particleCount : array<atomic<u32>>;
 @group(0) @binding(2) var<storage, read_write> g_particles : array<Particle>;
 @group(0) @binding(3) var<storage> g_shapes : array<SimShape>;
-@group(0) @binding(4) var<storage, read_write> g_freeCount : array<atomic<i32>>;
-@group(0) @binding(5) var<storage, read_write> g_freeIndices : array<u32>;
+@group(0) @binding(4) var<storage, read_write> g_freeIndices : array<atomic<i32>>;
 
 fn createParticle(position: vec2f, material: f32, mass: f32, volume: f32, color: vec3f) -> Particle
 {
@@ -38,10 +37,10 @@ fn addParticle(position: vec2f, material: f32, volume: f32, density: f32, jitter
 {
     var particleIndex = 0u;
     // First check the free list to see if we can reuse a particle slot
-    let freeIndexSlot = atomicSub(&g_freeCount[0], 1i) - 1i;
+    let freeIndexSlot = atomicSub(&g_freeIndices[0], 1i) - 1i;
     if(freeIndexSlot >= 0)
     {
-        particleIndex = g_freeIndices[u32(freeIndexSlot)];
+        particleIndex = u32(atomicLoad(&g_freeIndices[u32(freeIndexSlot) + 1]));
     }
     else // If free list is empty then grow the particle count
     {
