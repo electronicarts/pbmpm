@@ -151,12 +151,15 @@ function mainUpdate(timeStamp)
     
         const gpuContext = gpu.getGpuContext();
     
-        if(inputs.doReset)
-            gpu.resetBuffers();
+
 
         updateDom(gpuContext, inputs);
 
         gpu.beginFrame();
+
+        if(inputs.doReset)
+            gpu.resetBuffers(inputs.gridSize);
+        
         sim.update(gpuContext, inputs);    
         render.update(gpuContext, inputs);
         gpu.endFrame();
@@ -176,6 +179,8 @@ function updateInputs()
         || inputs.addElastic != g_prevInputs.addElastic
         || inputs.particlesPerCellAxis != g_prevInputs.particlesPerCellAxis
         || (inputs.solverType === sim.SimEnums.SolverTypePositionBasedFluids && inputs.solverType != g_prevInputs.solverType)
+        || inputs.gridSize[0] != g_prevInputs.gridSize[0]
+        || inputs.gridSize[1] != g_prevInputs.gridSize[1]
     ) {
         ui.windowResize();
         g_reset = true;

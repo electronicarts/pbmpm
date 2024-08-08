@@ -3,3 +3,8 @@
 //-----------------------------------------------------------------------------
 
 //!insert DispatchSizes
+
+fn divUp(threadCount : u32, divisor : u32) -> u32
+{
+    return (threadCount + divisor - 1) / divisor;
+}

@@ -29,7 +29,7 @@ export function getGpuContext() {return context;}
 
 export function divUp(threadCount, divisor)
 {
-    return Math.ceil(threadCount / divisor);
+    return Math.floor((threadCount + divisor - 1) / divisor);
 }
 
 export function createBindGroup(name, shaderName, resources)
@@ -47,29 +47,32 @@ export function createBindGroup(name, shaderName, resources)
     });
 }
 
-export function resetBuffers()
+export function construct4IntBuffer(name, usage, values)
+{
+    const buf = context.device.createBuffer({
+        name: name, 
+        size: 16,
+        usage: usage
+    })
+
+    const valueArray = new Int32Array(4);
+    valueArray.set(values);
+    context.device.queue.writeBuffer(buf, 0, valueArray);
+
+    return buf;
+}
+
+export function resetBuffers(gridSize)
 {
     // Constructs a buffer containing 4 integers of the given values
-    function construct4IntBuffer(name, usage, values)
-    {
-        context[name] = context.device.createBuffer({
-            name: name, 
-            size: 16,
-            usage: usage
-        })
-
-        const valueArray = new Int32Array(4);
-        valueArray.set(values);
-        context.device.queue.writeBuffer(context[name], 0, valueArray);
-    }
 
     // Construct various small buffers used for indirect dispatch, counting and staging
-    construct4IntBuffer('particleCountBuffer', GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC, [0,0,0,0]);
-    construct4IntBuffer('particleCountStagingBuffer', GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST, [0,0,0,0]);
-    construct4IntBuffer('particleRenderDispatchBuffer', GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.INDIRECT, [6,0,0,0]);
-    construct4IntBuffer('particleSimDispatchBuffer', GPUBufferUsage.STORAGE | GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_DST, [0,1,1,0]);
-    construct4IntBuffer('particleFreeCountBuffer', GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST, [0,0,0,0]);
-    construct4IntBuffer('particleFreeCountStagingBuffer', GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST, [0,0,0,0]);
+    context.particleCountBuffer = construct4IntBuffer('particleCountBuffer', GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC, [0,0,0,0]);
+    context.particleCountStagingBuffer = construct4IntBuffer('particleCountStagingBuffer', GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST, [0,0,0,0]);
+    context.particleRenderDispatchBuffer = construct4IntBuffer('particleRenderDispatchBuffer', GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.INDIRECT, [6,0,0,0]);
+    context.particleSimDispatchBuffer = construct4IntBuffer('particleSimDispatchBuffer', GPUBufferUsage.STORAGE | GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_DST, [0,1,1,0]);
+    context.particleFreeCountBuffer = construct4IntBuffer('particleFreeCountBuffer', GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST, [0,0,0,0]);
+    context.particleFreeCountStagingBuffer = construct4IntBuffer('particleFreeCountStagingBuffer', GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST, [0,0,0,0]);
 
     // Construct particle buffer.
     // Must be kept in sync with MPMParticle in particle.inc.wgsl
@@ -86,6 +89,21 @@ export function resetBuffers()
         size: context.maxParticleCount * 4,
         usage: GPUBufferUsage.STORAGE
     });
+
+    context.gridBuffer = context.device.createBuffer({
+        label: "gridBuffer",
+        size: gridSize[0] * gridSize[1] * 4 * 4,
+        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+    });
+
+    context.gridBufferTmp = context.device.createBuffer({
+        label: "gridBufferTmp",
+        size: gridSize[0] * gridSize[1] * 4 * 4,
+        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC
+    });
+
+    console.log(context.gridBuffer);
+    console.log(context.gridBufferTmp)
 }
 
 export function beginFrame()
@@ -149,6 +167,11 @@ export function computeDispatch(shaderName, resources, groupCount)
     let entries = []
     for(let i = 0; i < resources.length; ++i)
     {
+        if(!resources[i])
+        {
+            throw `Compute Dispatch [${shaderName}]: Resource at index ${i} was falsy!`
+        }
+
         entries.push({binding: i, resource: {buffer: resources[i]}});
     }
 
@@ -225,9 +248,9 @@ export async function init(insertHandlers)
     }
 
     context.device = await context.adapter.requestDevice({
-        requiredFeatures: [
-            context.canTimeStamp ? ['timestamp-query']: []
-        ]
+        requiredFeatures: context.canTimeStamp ? [
+             ['timestamp-query']
+        ] : undefined
     });
     
     await shader.init(context.device, insertHandlers);

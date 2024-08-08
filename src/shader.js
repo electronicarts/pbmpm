@@ -7,12 +7,14 @@
 export let Shaders = {
 
     // MPM  shaders
-    gridToParticle: 'gridToParticle',
-    particleToGrid: 'particleToGrid',
-    gridUpdate: 'gridUpdate',
-    gridZero: 'gridZero',
-    particleUpdatePBMPM: 'particleUpdatePBMPM',
     mpmParticleIntegrate: 'particleIntegrate',
+
+    g2p2g: 'g2p2g',
+
+    // Bukkitizing shaders
+    bukkitCount: 'bukkitCount',
+    bukkitAllocate: 'bukkitAllocate',
+    bukkitInsert: 'bukkitInsert',
 
     // Other sim shaders
     particleEmit: 'particleEmit',

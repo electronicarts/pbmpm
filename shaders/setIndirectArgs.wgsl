@@ -8,11 +8,6 @@
 @group(0) @binding(1) var<storage, read_write> g_simIndirectArgs : array<u32>;
 @group(0) @binding(2) var<storage, read_write> g_renderIndirectArgs : array<u32>;
 
-fn divUp(threadCount : u32, divisor : u32) -> u32
-{
-    return (threadCount + divisor - 1) / divisor;
-}
-
 @compute @workgroup_size(1)
 fn csMain( @builtin(global_invocation_id) id: vec3<u32> )
 {

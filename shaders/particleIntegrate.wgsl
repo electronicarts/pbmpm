@@ -143,7 +143,7 @@ fn csMain( @builtin(global_invocation_id) id: vec3<u32> )
 
     // Gravity acceleration is normalized to the vertical size of the window.
     particle.displacement.y -= f32(g_simConstants.gridSize.y)*g_simConstants.gravityStrength*g_simConstants.deltaTime*g_simConstants.deltaTime;
-
+    
     // Free count may be negative because of emission. So make sure it is at last zero before incrementing.
     atomicMax(&g_freeCount[0], 0i);
 

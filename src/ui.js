@@ -84,7 +84,7 @@ const g_uiElements =
     {type: Button,name: 'pauseButton', desc: 'Pause (Spacebar)'},
     {type: RawHTML, value: `<br>`},
     
-    {type: Combo, name: 'simResDivisor', desc:'Render Pixels per Sim Grid Cell', values:[1,2,4,8,16], default:8},
+    {type: Combo, name: 'simResDivisor', desc:'Render Pixels per Sim Grid Cell', values:[1,2,4,8,16], default:4},
 
     {type: Range, name: 'particlesPerCellAxis', desc: 'Particles per cell axis', default: 2, min: 1, max: 8, step: 1},
     {type: Combo, name: 'simRate', desc:"Sim Update Rate (Hz)", values:[15, 30, 60, 120, 240, 480, 600, 1200, 2400], default:480},
@@ -97,9 +97,9 @@ const g_uiElements =
         {desc:'Push', value: SimEnums.MouseFunctionPush},
     ]},
 
-    {type: Range, name: 'iterationCount', desc: 'Iteration Count', default: 2, min: 1, max: 10, step: 1},
+    {type: Range, name: 'iterationCount', desc: 'Iteration Count', default: 5, min: 1, max: 100, step: 1},
     {type: Range, name: 'elasticityRatio', desc: 'Elasticity Ratio', default: 1, min: 0, max: 1, step: 0.01},
-    {type: Range, name: 'liquidRelaxation', desc: 'Liquid Relaxation', default: 2, min: 0, max: 10, step: 0.01},
+    {type: Range, name: 'liquidRelaxation', desc: 'Liquid Relaxation', default: 1.5, min: 0, max: 10, step: 0.01},
     {type: Range, name: 'elasticRelaxation', desc: 'Elastic Relaxation', default: 1.5, min: 0, max: 10, step: 0.01},
     {type: Range, name: 'frictionAngle', desc: 'Sand Friction Angle', default: 30, min: 0, max: 45, step: 0.1},
     {type: Range, name: 'plasticity', desc: 'Visco Plasticity', default: 0, min: 0, max: 1, step: 0.01},

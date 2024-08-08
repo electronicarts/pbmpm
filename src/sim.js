@@ -13,6 +13,8 @@ import {Shaders} from "./shader.js"
 export const DispatchSizes = {
     ParticleDispatchSize: 64,
     GridDispatchSize: 8,
+    BukkitSize: 6,
+    BukkitHaloSize: 1,
 };
 
 export const SimEnums = {
@@ -79,6 +81,12 @@ export function init(insertHandlers)
 
     simFactory.add('shapeCount', buffer_factory.u32);
     simFactory.add('simFrame', buffer_factory.u32);
+    simFactory.add('bukkitCount', buffer_factory.u32);
+    simFactory.add('bukkitCountX', buffer_factory.u32);
+    simFactory.add('bukkitCountY', buffer_factory.u32);
+    simFactory.add('iteration', buffer_factory.u32);
+    simFactory.add('iterationCount', buffer_factory.u32);
+
     simFactory.compile();
 
     const shapeFactory = new buffer_factory.BufferFactory('SimShape', buffer_factory.Storage);
@@ -126,6 +134,27 @@ function doEmission(gpuContext, simUniformBuffer, inputs, shapeBuffer)
     gpu.computeDispatch(Shaders.setIndirectArgs, [gpuContext.particleCountBuffer, gpuContext.particleSimDispatchBuffer, gpuContext.particleRenderDispatchBuffer], [1,1,1]);
 }
 
+function bukkitizeParticles(gpuContext, simUniformBuffer, inputs, bukkitSystem)
+{
+    gpuContext.encoder.clearBuffer(bukkitSystem.countBuffer);
+    gpuContext.encoder.clearBuffer(bukkitSystem.countBuffer2);
+    gpuContext.encoder.clearBuffer(bukkitSystem.threadData);
+    gpuContext.encoder.clearBuffer(bukkitSystem.particleData);
+    gpuContext.encoder.clearBuffer(bukkitSystem.particleAllocator);
+    gpuContext.encoder.copyBufferToBuffer(bukkitSystem.blankDispatch, 0, bukkitSystem.dispatch, 0, bukkitSystem.dispatch.size);
+
+    gpu.computeDispatch(Shaders.bukkitCount, [simUniformBuffer, gpuContext.particleCountBuffer, gpuContext.particleBuffer, bukkitSystem.countBuffer], gpuContext.particleSimDispatchBuffer);
+
+    let bukkitDispatchSize = [
+        gpu.divUp(bukkitSystem.countX, DispatchSizes.GridDispatchSize),
+        gpu.divUp(bukkitSystem.countY, DispatchSizes.GridDispatchSize),
+        1
+    ];
+
+    gpu.computeDispatch(Shaders.bukkitAllocate, [simUniformBuffer, bukkitSystem.countBuffer, bukkitSystem.dispatch, bukkitSystem.threadData, bukkitSystem.particleAllocator, bukkitSystem.indexStart], bukkitDispatchSize);
+    gpu.computeDispatch(Shaders.bukkitInsert, [simUniformBuffer, gpuContext.particleCountBuffer, bukkitSystem.countBuffer2, gpuContext.particleBuffer, bukkitSystem.particleData, bukkitSystem.indexStart], gpuContext.particleSimDispatchBuffer);
+}
+
 export function update(gpuContext, inputs)
 {
     if(inputs.doReset)
@@ -134,47 +163,107 @@ export function update(gpuContext, inputs)
     }
 
     const shapeBuffer = constructShapeBuffer(gpuContext, inputs);
+    const bukkitSystem = constructBukkitSystem(gpuContext, inputs);
 
     const threadGroupCountX = gpu.divUp(inputs.gridSize[0], DispatchSizes.GridDispatchSize);
     const threadGroupCountY = gpu.divUp(inputs.gridSize[1], DispatchSizes.GridDispatchSize);
     const gridThreadGroupCounts = [threadGroupCountX, threadGroupCountY, 1];
 
     const substepCount = time.doTimeRegulation(inputs);
-    let gridBuffer;
-    if(substepCount > 0)
+    for(let substepIdx = 0; substepIdx < substepCount; ++substepIdx)
     {
-        gridBuffer = constructGridBuffer(gpuContext, inputs);
- 
-        for(let substepIdx = 0; substepIdx < substepCount; ++substepIdx)
+        var simUniformBuffer = constructSimUniformBuffer(gpuContext, inputs, bukkitSystem, 0);
+        doEmission(gpuContext, simUniformBuffer, inputs, shapeBuffer);
+
+        bukkitizeParticles(gpuContext, simUniformBuffer, inputs, bukkitSystem);
+
+        for(let iterationIdx = 0; iterationIdx < inputs.iterationCount; ++iterationIdx)
         {
-            const simUniformBuffer = constructSimUniformBuffer(gpuContext, inputs);
-            doEmission(gpuContext, simUniformBuffer, inputs, shapeBuffer);
+            simUniformBuffer = constructSimUniformBuffer(gpuContext, inputs, bukkitSystem, iterationIdx);
 
-            for(let iterationIdx = 0; iterationIdx < inputs.iterationCount; ++iterationIdx)
-            {
-                gpu.computeDispatch(Shaders.particleUpdatePBMPM, [simUniformBuffer, gpuContext.particleCountBuffer, gpuContext.particleBuffer], gpuContext.particleSimDispatchBuffer);
-                gpu.computeDispatch(Shaders.gridZero, [simUniformBuffer, gridBuffer],  gridThreadGroupCounts);
-                gpu.computeDispatch(Shaders.particleToGrid, [simUniformBuffer, gpuContext.particleCountBuffer, gpuContext.particleBuffer, gridBuffer], gpuContext.particleSimDispatchBuffer);
-                gpu.computeDispatch(Shaders.gridUpdate, [simUniformBuffer, gridBuffer, shapeBuffer], gridThreadGroupCounts);
-                gpu.computeDispatch(Shaders.gridToParticle, [simUniformBuffer, gpuContext.particleCountBuffer, gpuContext.particleBuffer, gridBuffer], gpuContext.particleSimDispatchBuffer);
-            }
+            gpuContext.encoder.clearBuffer(gpuContext.gridBufferTmp);
+            gpu.computeDispatch(Shaders.g2p2g, [simUniformBuffer, gpuContext.particleBuffer, gpuContext.gridBuffer, gpuContext.gridBufferTmp, bukkitSystem.threadData, bukkitSystem.particleData, shapeBuffer], bukkitSystem.dispatch)
 
-            gpu.computeDispatch(Shaders.mpmParticleIntegrate, [simUniformBuffer, gpuContext.particleCountBuffer, gpuContext.particleBuffer, shapeBuffer, gpuContext.particleFreeCountBuffer, gpuContext.particleFreeIndicesBuffer], gpuContext.particleSimDispatchBuffer);
-            g_substepIndex = (g_substepIndex + 1);
-        }  
+            const tmp = gpuContext.gridBufferTmp;
+            gpuContext.gridBufferTmp = gpuContext.gridBuffer;
+            gpuContext.gridBuffer = tmp;
+        }
+
+        gpu.computeDispatch(Shaders.mpmParticleIntegrate, [simUniformBuffer, gpuContext.particleCountBuffer, gpuContext.particleBuffer, shapeBuffer, gpuContext.particleFreeCountBuffer, gpuContext.particleFreeIndicesBuffer], gpuContext.particleSimDispatchBuffer);
+        g_substepIndex = (g_substepIndex + 1);
+    }  
+}
+
+function constructBukkitSystem(gpuContext, inputs) {
+    const bukkitCountX = Math.ceil(inputs.gridSize[0] / DispatchSizes.BukkitSize);
+    const bukkitCountY = Math.ceil(inputs.gridSize[1] / DispatchSizes.BukkitSize);
+
+    console.log(`Bukkit count: ${bukkitCountX * bukkitCountY}`);
+
+    const bukkitParticleCountBuffer = gpuContext.device.createBuffer({
+        label: "bukkitParticleCountBuffer",
+        size: bukkitCountX * bukkitCountY * 4, // One integer count per bukkit
+        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+    });
+
+    const bukkitParticleCountBuffer2 = gpuContext.device.createBuffer({
+        label: "bukkitParticleCountBuffer2",
+        size: bukkitCountX * bukkitCountY * 4, // One integer count per bukkit
+        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+    });
+
+    const bukkitParticleThreadData = gpuContext.device.createBuffer({
+        label: "bukkitParticleThreadData",
+        size: 10 * bukkitCountX * bukkitCountY * 4 * 4, // four integers per allocated bukkit thread group
+        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+    });
+
+    const bukkitParticleData = gpuContext.device.createBuffer({
+        label: 'bukkitParticleData',
+        size: gpuContext.maxParticleCount * 4, // One integer per particle
+        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+    })
+
+    const bukkitParticleDispatchBuffer = gpu.construct4IntBuffer(
+        'bukkitParticleDispatchBuffer', 
+        GPUBufferUsage.STORAGE | GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_DST,
+        [0,1,1,0]
+    );
+
+    const blankDispatchBuffer = gpu.construct4IntBuffer(
+        'blankDispatchBuffer', 
+        GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+        [0,1,1,0]
+    );
+
+    const bukkitParticleAllocator = gpu.construct4IntBuffer(
+        'bukkitParticleAllocator',
+        GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+        [0, 0, 0, 0]
+    );
+
+    const bukkitIndexStart = gpuContext.device.createBuffer({
+        label: 'bukkitIndexStart',
+        size: bukkitCountX * bukkitCountY * 4,
+        usage: GPUBufferUsage.STORAGE
+    });
+
+    return {
+        countX: bukkitCountX,
+        countY: bukkitCountY,
+        count: bukkitCountX*bukkitCountY,
+        countBuffer: bukkitParticleCountBuffer,
+        countBuffer2: bukkitParticleCountBuffer2,
+        particleData: bukkitParticleData,
+        threadData: bukkitParticleThreadData,
+        dispatch: bukkitParticleDispatchBuffer,
+        blankDispatch: blankDispatchBuffer,
+        particleAllocator: bukkitParticleAllocator,
+        indexStart: bukkitIndexStart
     }
 }
 
-function constructGridBuffer(gpuContext, inputs) {
-    return gpuContext.device.createBuffer({
-        label: "grid",
-        // square of grid vertices, each of which has 4 components of 4-byte integers
-        size: inputs.gridSize[0] * inputs.gridSize[1] * 4 * 4,
-        usage: GPUBufferUsage.STORAGE
-    });
-}
-
-function constructSimUniformBuffer(gpuContext, inputs)
+function constructSimUniformBuffer(gpuContext, inputs, bukkitSystem, iteration)
 {
     let mouseActivation = 0;
     if(inputs.isMouseDown)
@@ -207,7 +296,12 @@ function constructSimUniformBuffer(gpuContext, inputs)
         rho_zero: Math.pow(inputs.particlesPerCellAxis, 2)*inputs.rhoZeroMultiplier,
         mouseRadius: inputs.mouseRadius/inputs.simResDivisor,
         shapeCount: inputs.shapes.size,
-        simFrame: g_substepIndex
+        simFrame: g_substepIndex,
+        bukkitCount: bukkitSystem.count,
+        bukkitCountX: bukkitSystem.countX,
+        bukkitCountY: bukkitSystem.countY,
+        iteration: iteration,
+        iterationCount: inputs.iterationCount,
     };
 
     return g_simFactory.constructUniformBuffer(gpuContext.device, [inputs, setDirectlyValues, gpuContext]);

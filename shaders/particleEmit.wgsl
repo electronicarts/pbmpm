@@ -108,7 +108,7 @@ fn csMain( @builtin(global_invocation_id) id: vec3u )
             continue;
         }
 
-        let particleCountPerCellAxis = select(u32(g_simConstants.particlesPerCellAxis), 1, shape.emitMaterial == MaterialLiquid || shape.emitMaterial == MaterialSand);
+        let particleCountPerCellAxis = u32(g_simConstants.particlesPerCellAxis);
         let volumePerParticle = 1.0f / f32(particleCountPerCellAxis*particleCountPerCellAxis);
 
         var c = collide(shape, pos);

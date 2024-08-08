@@ -10,7 +10,7 @@ let g_timeState = {
     estimatedRenderTimeStepMs: 1000.0/60.0,
     estimatedThrottlingRatio: 1,
     framesAboveTarget: 0,
-    simFrameCountCap: 100,
+    simFrameCountCap: 20,
 }
 
 export function doTimeRegulation(inputs)
@@ -19,7 +19,7 @@ export function doTimeRegulation(inputs)
     {
         g_timeState.estimatedRenderTimeStepMs = 1000.0/60.0;
         g_timeState.prevTimeMs = inputs.timeStamp - g_timeState.estimatedRenderTimeStepMs;   
-        g_timeState.simFrameCountCap = 100;
+        g_timeState.simFrameCountCap = 20;
         g_timeState.framesAboveTarget = 0;
         g_timeState.estimatedThrottlingRatio = 1;
         g_timeState.timeAccumulatorMs = 0;
@@ -68,6 +68,7 @@ export function doTimeRegulation(inputs)
 
     if(substepCount > g_timeState.simFrameCountCap)
     {
+        console.log(`Warning: Requested substep count ${substepCount} will be capped to ${g_timeState.simFrameCountCap}`)
         substepCount = g_timeState.simFrameCountCap;
     }
 
