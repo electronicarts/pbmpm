@@ -19,6 +19,9 @@ let g_pause = false;
 
 let g_mouseRadius = 100;
 
+let g_manifest;
+let g_currentSceneName = 'No Scene Loaded'
+
 init();
 
 function init()
@@ -31,7 +34,7 @@ function init()
     // Setup the UI sidebar
     ui.init(() => {g_reset = true;}, () => {g_pause = !g_pause;});
 
-    loadSceneFromUrl('./scenes/damBreak.json');
+    loadScenes()
 
     // Setup sim.
     // Sim will add to the list of insert handlers.
@@ -476,3 +479,14 @@ async function pickLoadScene()
     const file = await result.getFile();
     loadScene(JSON.parse(await file.text()));
 }
+
+async function loadScenes()
+{
+    g_manifest = await (await fetch('./scenes/manifest.json')).json();
+
+    let sceneCount = g_manifest.length;
+
+    let randomIndex = Math.floor(Math.random()*sceneCount);
+
+    await loadSceneFromUrl(g_manifest[randomIndex].scene).then(() => {g_currentSceneName = g_manifest[randomIndex].name});
+}   

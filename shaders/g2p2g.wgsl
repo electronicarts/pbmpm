@@ -312,7 +312,7 @@ fn csMain( @builtin(local_invocation_index) indexInGroup: u32, @builtin(workgrou
                             }
                             else if(g_simConstants.mouseFunction == MouseFunctionGrab)
                             {
-                                particle.displacement = 0.7*g_simConstants.mouseVelocity*g_simConstants.deltaTime;
+                                particle.displacement = g_simConstants.mouseVelocity*g_simConstants.deltaTime;
                             }
                         }
                     }

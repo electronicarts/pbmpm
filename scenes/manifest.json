@@ -1,0 +1,7 @@
+[
+    { "scene": "./scenes/damBreak.json", "name": "Dam Break" },
+    { "scene": "./scenes/4Materials.json", "name": "Four Materials"},
+    { "scene": "./scenes/plasticPress.json", "name": "Plastic Press"},
+    { "scene": "./scenes/pyramid.json", "name": "Pyramid"},
+    { "scene": "./scenes/sandPile.json", "name": "SandPile"}
+]
