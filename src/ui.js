@@ -84,10 +84,10 @@ const g_uiElements =
     {type: Button,name: 'pauseButton', desc: 'Pause (Spacebar)'},
     {type: RawHTML, value: `<br>`},
     
-    {type: Combo, name: 'simResDivisor', desc:'Render Pixels per Sim Grid Cell', values:[1,2,4,8,16], default:4},
+    {type: Combo, name: 'simResDivisor', desc:'Render Pixels per Sim Grid Cell', values:[1,2,4,8,16], default:8},
 
     {type: Range, name: 'particlesPerCellAxis', desc: 'Particles per cell axis', default: 2, min: 1, max: 8, step: 1},
-    {type: Combo, name: 'simRate', desc:"Sim Update Rate (Hz)", values:[15, 30, 60, 120, 240, 480, 600, 1200, 2400], default:480},
+    {type: Combo, name: 'simRate', desc:"Sim Update Rate (Hz)", values:[15, 30, 60, 120, 240, 480, 600, 1200, 2400], default:240},
     {type: Checkbox, name: 'useGridVolumeForLiquid', desc: 'Use Grid Volume for Liquid', default: true},
     {type: Range, name: 'fixedPointMultiplierExponent', desc: 'log10(Fixed Point Multiplier)', default: 7, min: 3, max: 10, step: 1},
     {type: Range, name: 'gravityStrength', desc: 'Gravity Strength', default: 2.5, min: 0, max: 5, step: 0.01},
