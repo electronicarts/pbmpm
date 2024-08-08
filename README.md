@@ -13,7 +13,7 @@ This **Main** branch contains many optimizations that make it harder to understa
 
 ## Building
 
-PB-MPM is based on WebGPU. Currently, this means Firefox will not work on desktop browsers.
+PB-MPM is based on WebGPU. Currently, this means that among desktop browsers, **Firefox will not work**.
 Some mobile hardware can run WebGPU but this app is not properly mobile-aware so the experience will not be good.
 
 1. [Install Ruby](https://www.ruby-lang.org/en/documentation/installation/). If you are on *MacOS*: Please follow [these instructions](https://jekyllrb.com/docs/installation/macos/). 
