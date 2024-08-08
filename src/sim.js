@@ -198,8 +198,6 @@ function constructBukkitSystem(gpuContext, inputs) {
     const bukkitCountX = Math.ceil(inputs.gridSize[0] / DispatchSizes.BukkitSize);
     const bukkitCountY = Math.ceil(inputs.gridSize[1] / DispatchSizes.BukkitSize);
 
-    console.log(`Bukkit count: ${bukkitCountX * bukkitCountY}`);
-
     const bukkitParticleCountBuffer = gpuContext.device.createBuffer({
         label: "bukkitParticleCountBuffer",
         size: bukkitCountX * bukkitCountY * 4, // One integer count per bukkit
