@@ -52,7 +52,8 @@ export function getInputs()
         resolution: [g_canvas.width, g_canvas.height],
         gridSize: [g_gridSizeX, g_gridSizeY],
         canvas: g_canvas,
-        shapes: g_simShapes
+        shapes: g_simShapes,
+        scenario: document.getElementById('scenarioCombo')?.value
     }
 
     for(const element of g_uiElements)
@@ -80,6 +81,8 @@ const Checkbox = 'checkbox'
 
 const g_uiElements = 
 [
+    {type: RawHTML, value: `<div id='scenarioContainer'> </div>`},
+    {type: RawHTML, value: `<button id="saveSceneButton" type='button' class="inputCombo">Save Scene</button><br>`},
     {type: Button,name: 'resetButton', desc: 'Reset (F5)'},
     {type: Button,name: 'pauseButton', desc: 'Pause (Spacebar)'},
     {type: RawHTML, value: `<br>`},
@@ -331,13 +334,7 @@ export function update(inputs, uiIsHidden)
                     }
                 }
             } 
-    
         }
-    
-    
-
-    
-
     
         for(const shape of g_simShapes)
         {
@@ -375,7 +372,6 @@ export function update(inputs, uiIsHidden)
                 
             const lineStyle=`rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.5)`;
     
-    
             if(shape.shape == SimEnums.ShapeTypeBox)
             {
                 canvas.resetTransform();
@@ -388,8 +384,6 @@ export function update(inputs, uiIsHidden)
                 canvas.strokeStyle = lineStyle;
                 canvas.rect(0, 0, shape.halfSize.x*2, shape.halfSize.y*2);
                 canvas.stroke();
-    
-    
             }
             else if(shape.shape == SimEnums.ShapeTypeCircle)
             {
@@ -480,3 +474,76 @@ export function duplicateShape()
     }
 }
 
+export function clearShapes()
+{
+    g_simShapes.clear();
+    g_grabbedObject = undefined;
+    g_dragging = undefined;
+    g_mouseOverObject = undefined;
+}
+
+export function setUIElementsToDefault()
+{
+    for(const element of g_uiElements)
+    {
+        const docElem = document.getElementById(element.name);
+
+        if(element.type === Range || element.type === Combo)
+        {
+            docElem.value = element.default;
+            docElem.dispatchEvent(new Event('input', {bubbles: true}));
+        }
+        else if(element.type === Checkbox)
+        {
+            docElem.checked = element.default;
+        }
+    }
+}
+
+export function getNonDefaultUIElements()
+{
+    let nonDefaultUIElements = []
+    for(const element of g_uiElements)
+    {
+        let value;
+        if(element.type === Range || element.type === Combo)
+        {
+            value = document.getElementById(element.name).value;
+        }
+        else if(element.type === Checkbox)
+        {
+            value = document.getElementById(element.name).checked;
+        }
+
+        if(value != element.default)
+        {
+            nonDefaultUIElements.push({
+                name: element.name,
+                type: element.type,
+                value: value
+            });
+        }
+    }
+
+    return nonDefaultUIElements;
+}
+
+export function setUIElements(elements)
+{
+    for(var i = 0; i < elements.length; ++i)
+    {
+        const element = elements[i];
+
+        const docElem = document.getElementById(element.name);
+
+        if(element.type === Range || element.type === Combo)
+        {
+            docElem.value = element.value;
+            docElem.dispatchEvent(new Event('input', {bubbles: true}));
+        }
+        else if(element.type === Checkbox)
+        {
+            docElem.checked = element.value;
+        }
+    }
+}

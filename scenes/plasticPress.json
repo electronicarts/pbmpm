@@ -1,111 +1,138 @@
 {
-    "version": 1,
+    "version": 2,
     "resolution": [
-        1920,
-        1080
+        2560,
+        1313
     ],
     "shapes": [
         {
             "id": "shape1",
             "position": {
-                "x": -414.2125000000001,
-                "y": 457
+                "x": -552.2833333333334,
+                "y": 555.5935185185185
             },
             "halfSize": {
-                "x": "814",
-                "y": "575"
+                "x": "1000",
+                "y": "956"
             },
             "rotation": 0,
             "shape": "0",
             "function": "1",
             "emitMaterial": "3",
             "emissionRate": "5.3",
-            "radius": 20
+            "radius": 25.46360268556661
         },
         {
             "id": "shape0",
             "position": {
-                "x": 1575.7875,
-                "y": 515
+                "x": 2101.0499999999997,
+                "y": 626.1064814814815
             },
             "halfSize": {
-                "x": "327",
-                "y": "584"
+                "x": "416",
+                "y": "673"
             },
             "rotation": 0,
             "shape": "0",
             "function": "3",
             "emitMaterial": "3",
             "emissionRate": "5.3",
-            "radius": 20
+            "radius": 25.46360268556661
         },
         {
             "id": "shape2",
             "position": {
-                "x": 1219.7875,
-                "y": 208
+                "x": 1626.3833333333332,
+                "y": 252.8740740740741
             },
             "halfSize": {
-                "x": "9",
-                "y": "62"
+                "x": "11",
+                "y": "79"
             },
             "rotation": 0,
             "shape": "0",
             "function": "1",
             "emitMaterial": "3",
             "emissionRate": "5.3",
-            "radius": 20
+            "radius": 25.46360268556661
         },
         {
             "id": "shape3",
             "position": {
-                "x": 1218.7875,
-                "y": -31
+                "x": 1625.0499999999997,
+                "y": -37.68796296296296
             },
             "halfSize": {
-                "x": "9",
-                "y": "62"
+                "x": "11",
+                "y": "79"
             },
             "rotation": 0,
             "shape": "0",
             "function": "1",
             "emitMaterial": "3",
             "emissionRate": "5.3",
-            "radius": 20
+            "radius": 25.46360268556661
         },
         {
             "id": "shape4",
             "position": {
-                "x": 1217.7875,
-                "y": 92
+                "x": 1623.7166666666665,
+                "y": 111.84814814814816
             },
             "halfSize": {
-                "x": "9",
-                "y": "35"
+                "x": "11",
+                "y": "45"
             },
             "rotation": 0,
             "shape": "0",
             "function": "1",
             "emitMaterial": "3",
             "emissionRate": "5.3",
-            "radius": 20
+            "radius": 25.46360268556661
         },
         {
             "id": "shape5",
             "position": {
-                "x": 778.7874999999999,
-                "y": 609
+                "x": 1117.3833333333332,
+                "y": 869.3861111111112
             },
             "halfSize": {
-                "x": "442",
-                "y": "425"
+                "x": "563",
+                "y": "664"
             },
             "rotation": 0,
             "shape": "0",
             "function": "1",
             "emitMaterial": "3",
             "emissionRate": "5.3",
-            "radius": 20
+            "radius": 25.46360268556661
+        }
+    ],
+    "settings": [
+        {
+            "name": "particlesPerCellAxis",
+            "type": "range",
+            "value": "3"
+        },
+        {
+            "name": "simRate",
+            "type": "combo",
+            "value": "480"
+        },
+        {
+            "name": "iterationCount",
+            "type": "range",
+            "value": "10"
+        },
+        {
+            "name": "plasticity",
+            "type": "range",
+            "value": "0.93"
+        },
+        {
+            "name": "renderMode",
+            "type": "combo",
+            "value": "0"
         }
     ]
 }

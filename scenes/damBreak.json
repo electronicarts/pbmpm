@@ -1,9 +1,12 @@
 {
-    "version": 1,
+    "version": 2,
     "resolution": [
         1530,
         863
     ],
+	"settings": [
+		{"name": "iterationCount", "value": 10, "type": "range"}
+	],
     "shapes": [
         {
             "id": "shape1",

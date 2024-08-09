@@ -365,56 +365,74 @@ export async function init(insertHandlers)
 function readbackParticleCount()
 {
     context.particleCountStagingBuffer.mapAsync(GPUMapMode.READ, 0, 16).then(() => {
-        const buf = context.particleCountStagingBuffer.getMappedRange(0, 16);
-        const view = new Int32Array(buf);
-        context.particleCount = view[0];
-        context.particleCount = Math.min(context.maxParticleCount, context.particleCount);
-        context.particleCountStagingBuffer.unmap();
-        context.particleCountDirty = true;
+        try
+        {
+            const buf = context.particleCountStagingBuffer.getMappedRange(0, 16);
+            const view = new Int32Array(buf);
+            context.particleCount = view[0];
+            context.particleCount = Math.min(context.maxParticleCount, context.particleCount);
+            context.particleCountDirty = true;
+        }
+        finally
+        {
+            context.particleCountStagingBuffer.unmap();
+        }
     });
 }
 
 function readbackParticleFreeCount()
 {
     context.particleFreeCountStagingBuffer.mapAsync(GPUMapMode.READ, 0, 16).then(() => {
-        const buf = context.particleFreeCountStagingBuffer.getMappedRange(0, 16);
-        const view = new Int32Array(buf);
-        context.particleFreeCount = view[0];
-        context.particleFreeCountStagingBuffer.unmap();
-        context.particleCountDirty = true;
+        try
+        {
+            const buf = context.particleFreeCountStagingBuffer.getMappedRange(0, 16);
+            const view = new Int32Array(buf);
+            context.particleFreeCount = view[0];
+            context.particleCountDirty = true;
+        }
+        finally
+        {
+            context.particleFreeCountStagingBuffer.unmap();
+        }
     });
 }
 
 function readbackTimeStamps()
 {
     context.timeStampResultBuffer.mapAsync(GPUMapMode.READ).then(() => {
-        const times = new BigInt64Array(context.timeStampResultBuffer.getMappedRange());
-
-        var movingAverageTimeStamps = {};
-
-
-        for(const name of Object.keys(context.frameTimeStampNames))
+        try
         {
-            var total = 0;
-            for(const index of context.frameTimeStampNames[name])
+            const times = new BigInt64Array(context.timeStampResultBuffer.getMappedRange());
+
+            var movingAverageTimeStamps = {};
+    
+    
+            for(const name of Object.keys(context.frameTimeStampNames))
             {
-                total += Number(times[index+1] - times[index]);
+                var total = 0;
+                for(const index of context.frameTimeStampNames[name])
+                {
+                    total += Number(times[index+1] - times[index]);
+                }
+    
+                movingAverageTimeStamps[name] = total;
             }
-
-            movingAverageTimeStamps[name] = total;
+    
+            for(const name of Object.keys(movingAverageTimeStamps))
+            {
+                if(name in context.movingAverageTimeStamps)
+                {
+                    movingAverageTimeStamps[name] = 0.01*movingAverageTimeStamps[name] + 0.99*context.movingAverageTimeStamps[name]
+                }
+            }
+    
+            context.movingAverageTimeStamps = movingAverageTimeStamps;
+    
+            context.timingStatsDirty = true;
         }
-        context.timeStampResultBuffer.unmap();
-
-        for(const name of Object.keys(movingAverageTimeStamps))
+        finally
         {
-            if(name in context.movingAverageTimeStamps)
-            {
-                movingAverageTimeStamps[name] = 0.01*movingAverageTimeStamps[name] + 0.99*context.movingAverageTimeStamps[name]
-            }
+            context.timeStampResultBuffer.unmap();
         }
-
-        context.movingAverageTimeStamps = movingAverageTimeStamps;
-
-        context.timingStatsDirty = true;
     });
 }

@@ -136,7 +136,6 @@ fn csMain( @builtin(local_invocation_index) indexInGroup: u32, @builtin(workgrou
     {
         // Load Particle
         let myParticleIndex = g_bukkitParticleData[threadData.rangeStart + indexInGroup];
-        //let myParticleIndex = indexInGroup + groupId.x*ParticleDispatchSize;
         var particle = g_particles[myParticleIndex];
 
         if(particle.enabled != 0.0)
@@ -363,7 +362,7 @@ fn csMain( @builtin(local_invocation_index) indexInGroup: u32, @builtin(workgrou
             }
 
             
-            //if(g_simConstants.iteration != g_simConstants.iterationCount-1)
+            if(g_simConstants.iteration != g_simConstants.iterationCount-1)
             {
                 // Particle update
                 if(particle.material == MaterialLiquid)

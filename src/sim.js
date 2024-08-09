@@ -347,6 +347,21 @@ function constructShapeBuffer(gpuContext, inputs)
         }
     }
 
+    if(solverShapes.length == 0)
+    {
+        solverShapes.push({
+            position: [0,0],
+            halfSize: [0,0],
+            radius: 0,
+            rotation: 0,
+            shapeType: 0,
+            functionality: 0,
+            emitMaterial: 0,
+            emissionRate: 0,
+            emissionSpeed: 0,
+        });
+    }
+
 
     return g_shapeFactory.constructStorageBuffer(gpuContext.device, solverShapes);
 }

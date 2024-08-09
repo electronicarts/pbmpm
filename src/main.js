@@ -20,7 +20,6 @@ let g_pause = false;
 let g_mouseRadius = 100;
 
 let g_manifest;
-let g_currentSceneName = 'No Scene Loaded'
 
 init();
 
@@ -90,6 +89,11 @@ function init()
             e.preventDefault();
             ui.deleteShape();
         }
+        if(e.key === 'Tab')
+        {
+            e.preventDefault();
+            cycleScene();
+        }
     };
 
     document.addEventListener('wheel', event => {
@@ -128,7 +132,6 @@ function init()
     })
 
     document.getElementById('saveSceneButton').addEventListener('click', saveScene);
-    document.getElementById('loadSceneButton').addEventListener('click', pickLoadScene);
 
 
     // Start render loop
@@ -154,8 +157,6 @@ function mainUpdate(timeStamp)
     
         const gpuContext = gpu.getGpuContext();
     
-
-
         updateDom(gpuContext, inputs);
 
         gpu.beginFrame();
@@ -176,6 +177,14 @@ function mainUpdate(timeStamp)
 function updateInputs()
 {
     let inputs = ui.getInputs();
+
+    const scenarioChanged = inputs.scenario != g_prevInputs.scenario;
+    if(scenarioChanged)
+    {
+        ui.clearShapes();
+        document.getElementById('shapesList').innerHTML = '';
+        loadSceneFromUrl(g_manifest[inputs.scenario].scene).then(() => {g_reset = true});
+    }
 
     if(inputs.simResDivisor != g_prevInputs.simResDivisor
         || inputs.addLiquid != g_prevInputs.addLiquid
@@ -427,16 +436,17 @@ async function saveScene()
     const result = await window.showSaveFilePicker();
     const stream = await result.createWritable();
     await stream.write(JSON.stringify({
-        version: 1,
+        version: 2,
         resolution: [ui.g_canvas.width, ui.g_canvas.height],
-        shapes: Array.from(ui.g_simShapes)
+        shapes: Array.from(ui.g_simShapes),
+        settings: ui.getNonDefaultUIElements(),
     }, null, 4));
     await stream.close();
 }
 
 function loadScene(json)
 {
-    if(json.version != 1)
+    if(json.version < 1 || json.version > 2)
     {
         throw 'Unrecognized version'
     }
@@ -451,7 +461,7 @@ function loadScene(json)
     const scaleScale = Math.sqrt(widthScale*heightScale);
 
     var shapes = json.shapes;
-    ui.g_simShapes.clear();
+    ui.clearShapes();
 
     for(var shape of shapes)
     {
@@ -465,6 +475,13 @@ function loadScene(json)
 
         ui.g_simShapes.add(shape);
     }
+
+    ui.setUIElementsToDefault();
+    if(json.version >= 2)
+    {
+        console.log(json.settings);
+        ui.setUIElements(json.settings)
+    }
 }
 
 async function loadSceneFromUrl(url)
@@ -473,20 +490,34 @@ async function loadSceneFromUrl(url)
     loadScene(await res.json());
 }
 
-async function pickLoadScene()
-{
-    const [result] = await window.showOpenFilePicker();
-    const file = await result.getFile();
-    loadScene(JSON.parse(await file.text()));
-}
-
 async function loadScenes()
 {
     g_manifest = await (await fetch('./scenes/manifest.json')).json();
 
-    let sceneCount = g_manifest.length;
+    let scenarioContainer = document.getElementById('scenarioContainer');
 
-    let randomIndex = Math.floor(Math.random()*sceneCount);
+    let html = `
+        <label class='input' for='scenarioCombo'>Scenario (Tab)</label>
+        <select class='inputCombo' id='scenarioCombo'>
+    `;
 
-    await loadSceneFromUrl(g_manifest[randomIndex].scene).then(() => {g_currentSceneName = g_manifest[randomIndex].name});
+    for(let i = 0; i < g_manifest.length; ++i)
+    {
+        const elem = g_manifest[i];
+        const selectedHTML = (i == 0) ? `selected='selected'` : '';
+        html += `<option id='scene${i}' value='${i}' ${selectedHTML}>${elem.name}</option>\n`
+    }
+
+    html += `</select>\n<br>\n`;
+
+    scenarioContainer.innerHTML = html;
+
+    loadSceneFromUrl(g_manifest[0].scene);
 }   
+
+function cycleScene()
+{
+    let inputs = ui.getInputs();
+    let nextScenario = (Number(inputs.scenario)+ 1) % g_manifest.length;
+    document.getElementById(`scenarioCombo`).value = nextScenario;
+}
