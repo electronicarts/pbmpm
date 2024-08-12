@@ -171,6 +171,17 @@ export function update(gpuContext, inputs)
     const shapeBuffer = constructShapeBuffer(gpuContext, inputs);
     const bukkitSystem = constructBukkitSystem(gpuContext, inputs);
 
+    let gridBuffers = [];
+
+    for(let i = 0; i < 3; ++i)
+    {
+        gridBuffers.push(gpuContext.device.createBuffer({
+            label: `gridBuffer${i}`,
+            size: inputs.gridSize[0] * inputs.gridSize[1] * 4 * 4,
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+        }));
+    } 
+
     const substepCount = time.doTimeRegulation(inputs);
     for(let substepIdx = 0; substepIdx < substepCount; ++substepIdx)
     {
@@ -182,9 +193,9 @@ export function update(gpuContext, inputs)
         {
             simUniformBuffer = constructSimUniformBuffer(gpuContext, inputs, bukkitSystem, iterationIdx);
 
-            const currentGrid = gpuContext.gridBuffers[bufferIdx]
-            const nextGrid = gpuContext.gridBuffers[(bufferIdx + 1)%3]
-            const nextNextGrid = gpuContext.gridBuffers[(bufferIdx + 2)%3]
+            const currentGrid = gridBuffers[bufferIdx]
+            const nextGrid = gridBuffers[(bufferIdx + 1)%3]
+            const nextNextGrid = gridBuffers[(bufferIdx + 2)%3]
             bufferIdx = (bufferIdx + 1) % 3;
 
             gpu.computeDispatch(Shaders.g2p2g, [simUniformBuffer, gpuContext.particleBuffer, currentGrid, nextGrid, nextNextGrid, bukkitSystem.threadData, bukkitSystem.particleData, shapeBuffer, gpuContext.particleFreeIndicesBuffer], bukkitSystem.dispatch)

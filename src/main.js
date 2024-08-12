@@ -479,7 +479,6 @@ function loadScene(json)
     ui.setUIElementsToDefault();
     if(json.version >= 2)
     {
-        console.log(json.settings);
         ui.setUIElements(json.settings)
     }
 }
