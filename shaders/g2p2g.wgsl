@@ -134,8 +134,7 @@ fn csMain( @builtin(local_invocation_index) indexInGroup: u32, @builtin(workgrou
 
     if(indexInGroup < threadData.rangeCount)
     {
-        // Load Particle,
-        // Note if particles have been buckkited then they must be valid.
+        // Load Particle
         let myParticleIndex = g_bukkitParticleData[threadData.rangeStart + indexInGroup];
         var particle = g_particles[myParticleIndex];
 
@@ -358,107 +357,106 @@ fn csMain( @builtin(local_invocation_index) indexInGroup: u32, @builtin(workgrou
 
             // Save particle
             g_particles[myParticleIndex] = particle;
+        }
 
-            
-            if(g_simConstants.iteration != g_simConstants.iterationCount-1)
+        
+        if(g_simConstants.iteration != g_simConstants.iterationCount-1)
+        {
+            // Particle update
+            if(particle.material == MaterialLiquid)
             {
-                // Particle update
-                if(particle.material == MaterialLiquid)
-                {
-                    // Simple liquid viscosity: just remove deviatoric part of the deformation displacement
-                    let deviatoric = -1.0*(particle.deformationDisplacement + transpose(particle.deformationDisplacement));
-                    particle.deformationDisplacement += g_simConstants.liquidViscosity*0.5*deviatoric;
+                // Simple liquid viscosity: just remove deviatoric part of the deformation displacement
+                let deviatoric = -1.0*(particle.deformationDisplacement + transpose(particle.deformationDisplacement));
+                particle.deformationDisplacement += g_simConstants.liquidViscosity*0.5*deviatoric;
 
-                    // Volume preservation constraint:
-                    // we want to generate hydrostatic impulses with the form alpha*I
-                    // and we want the liquid volume integration (see particleIntegrate) to yield 1 = (1+tr(alpha*I + D))*det(F) at the end of the timestep.
-                    // where det(F) is stored as particle.liquidDensity.
-                    // Rearranging, we get the below expression that drives the deformation displacement towards preserving the volume.
-                    let alpha = 0.5*(1.0/particle.liquidDensity - tr(particle.deformationDisplacement) - 1.0);
-                    particle.deformationDisplacement += g_simConstants.liquidRelaxation*alpha*Identity; 
+                // Volume preservation constraint:
+                // we want to generate hydrostatic impulses with the form alpha*I
+                // and we want the liquid volume integration (see particleIntegrate) to yield 1 = (1+tr(alpha*I + D))*det(F) at the end of the timestep.
+                // where det(F) is stored as particle.liquidDensity.
+                // Rearranging, we get the below expression that drives the deformation displacement towards preserving the volume.
+                let alpha = 0.5*(1.0/particle.liquidDensity - tr(particle.deformationDisplacement) - 1.0);
+                particle.deformationDisplacement += g_simConstants.liquidRelaxation*alpha*Identity; 
+            }
+            else if(particle.material == MaterialElastic || particle.material == MaterialVisco)
+            {
+                let F =  (Identity + particle.deformationDisplacement) * particle.deformationGradient;
+
+                var svdResult = svd(F);
+                
+                // Closest matrix to F with det == 1
+                let df = det(F);
+                let cdf = clamp(abs(df), 0.1, 1000);
+                let Q = (1.0f/(sign(df)*sqrt(cdf)))*F;
+                // Interpolate between the two target shapes
+                let alpha = g_simConstants.elasticityRatio;
+                let tgt = alpha*(svdResult.U*svdResult.Vt) + (1.0-alpha)*Q;
+
+                let diff = (tgt*inverse(particle.deformationGradient) - Identity) - particle.deformationDisplacement;
+                particle.deformationDisplacement += g_simConstants.elasticRelaxation*diff;
+
+            }
+            else if(particle.material == MaterialSand)
+            {
+                let F =  (Identity + particle.deformationDisplacement) * particle.deformationGradient;
+
+                var svdResult = svd(F);
+
+                if(particle.logJp == 0)
+                {
+                    svdResult.Sigma = clamp(svdResult.Sigma, vec2f(1, 1), vec2f(1000, 1000));
                 }
-                else if(particle.material == MaterialElastic || particle.material == MaterialVisco)
-                {
-                    let F =  (Identity + particle.deformationDisplacement) * particle.deformationGradient;
 
-                    var svdResult = svd(F);
+                // Closest matrix to F with det == 1
+                let df = det(F);
+                let cdf = clamp(abs(df), 0.1, 1);
+                let Q = (1.0f/(sign(df)*sqrt(cdf)))*F;
+                // Interpolate between the two target shapes
+                let alpha = g_simConstants.elasticityRatio;
+                let tgt = alpha*(svdResult.U*mat2x2f(svdResult.Sigma.x, 0, 0, svdResult.Sigma.y)*svdResult.Vt) + (1.0-alpha)*Q;
+
+                let diff = (tgt*inverse(particle.deformationGradient) - Identity) - particle.deformationDisplacement;
+                particle.deformationDisplacement += g_simConstants.elasticRelaxation*diff;
+
+                let deviatoric = -1.0*(particle.deformationDisplacement + transpose(particle.deformationDisplacement));
+                particle.deformationDisplacement += g_simConstants.liquidViscosity*0.5*deviatoric;
+            }
+
+            // P2G
+
+
+            // Iterate over local 3x3 neigbourhood
+            for(var i = 0; i < 3; i++)
+            {
+                for(var j = 0; j < 3; j++)
+                {
+                    // Weight corresponding to this neighbourhood cell
+                    let weight = weightInfo.weights[i].x * weightInfo.weights[j].y;
                     
-                    // Closest matrix to F with det == 1
-                    let df = det(F);
-                    let cdf = clamp(abs(df), 0.1, 1000);
-                    let Q = (1.0f/(sign(df)*sqrt(cdf)))*F;
-                    // Interpolate between the two target shapes
-                    let alpha = g_simConstants.elasticityRatio;
-                    let tgt = alpha*(svdResult.U*svdResult.Vt) + (1.0-alpha)*Q;
+                    // 2d index of this cell in the grid
+                    let neighbourCellIndex = vec2i(weightInfo.cellIndex) + vec2i(i,j);
 
-                    let diff = (tgt*inverse(particle.deformationGradient) - Identity) - particle.deformationDisplacement;
-                    particle.deformationDisplacement += g_simConstants.elasticRelaxation*diff;
+                    // 2d index relative to the corner of the local grid
+                    let neighbourCellIndexLocal = neighbourCellIndex - localGridOrigin;
 
-                }
-                else if(particle.material == MaterialSand)
-                {
-                    let F =  (Identity + particle.deformationDisplacement) * particle.deformationGradient;
+                    // Linear index in the local grid
+                    let gridVertexIdx = localGridIndex(vec2u(neighbourCellIndexLocal));
+                    
+                    let offset = vec2f(neighbourCellIndex) - p + 0.5;
 
-                    var svdResult = svd(F);
+                    let weightedMass = weight * particle.mass;
+                    let momentum = weightedMass * (particle.displacement +  particle.deformationDisplacement * offset);
 
-                    if(particle.logJp == 0)
+                    atomicAdd(&s_tileDataDst[gridVertexIdx + 0], encodeFixedPoint(momentum.x, g_simConstants.fixedPointMultiplier));
+                    atomicAdd(&s_tileDataDst[gridVertexIdx + 1], encodeFixedPoint(momentum.y, g_simConstants.fixedPointMultiplier));
+                    atomicAdd(&s_tileDataDst[gridVertexIdx + 2], encodeFixedPoint(weightedMass, g_simConstants.fixedPointMultiplier));
+
+                    // This is only required if we are going to mix in the grid volume to the liquid volume
+                    if(g_simConstants.useGridVolumeForLiquid != 0)
                     {
-                        svdResult.Sigma = clamp(svdResult.Sigma, vec2f(1, 1), vec2f(1000, 1000));
-                    }
-
-                    // Closest matrix to F with det == 1
-                    let df = det(F);
-                    let cdf = clamp(abs(df), 0.1, 1);
-                    let Q = (1.0f/(sign(df)*sqrt(cdf)))*F;
-                    // Interpolate between the two target shapes
-                    let alpha = g_simConstants.elasticityRatio;
-                    let tgt = alpha*(svdResult.U*mat2x2f(svdResult.Sigma.x, 0, 0, svdResult.Sigma.y)*svdResult.Vt) + (1.0-alpha)*Q;
-
-                    let diff = (tgt*inverse(particle.deformationGradient) - Identity) - particle.deformationDisplacement;
-                    particle.deformationDisplacement += g_simConstants.elasticRelaxation*diff;
-
-                    let deviatoric = -1.0*(particle.deformationDisplacement + transpose(particle.deformationDisplacement));
-                    particle.deformationDisplacement += g_simConstants.liquidViscosity*0.5*deviatoric;
-                }
-
-                // P2G
-
-
-                // Iterate over local 3x3 neigbourhood
-                for(var i = 0; i < 3; i++)
-                {
-                    for(var j = 0; j < 3; j++)
-                    {
-                        // Weight corresponding to this neighbourhood cell
-                        let weight = weightInfo.weights[i].x * weightInfo.weights[j].y;
-                        
-                        // 2d index of this cell in the grid
-                        let neighbourCellIndex = vec2i(weightInfo.cellIndex) + vec2i(i,j);
-
-                        // 2d index relative to the corner of the local grid
-                        let neighbourCellIndexLocal = neighbourCellIndex - localGridOrigin;
-
-                        // Linear index in the local grid
-                        let gridVertexIdx = localGridIndex(vec2u(neighbourCellIndexLocal));
-                        
-                        let offset = vec2f(neighbourCellIndex) - p + 0.5;
-
-                        let weightedMass = weight * particle.mass;
-                        let momentum = weightedMass * (particle.displacement +  particle.deformationDisplacement * offset);
-
-                        atomicAdd(&s_tileDataDst[gridVertexIdx + 0], encodeFixedPoint(momentum.x, g_simConstants.fixedPointMultiplier));
-                        atomicAdd(&s_tileDataDst[gridVertexIdx + 1], encodeFixedPoint(momentum.y, g_simConstants.fixedPointMultiplier));
-                        atomicAdd(&s_tileDataDst[gridVertexIdx + 2], encodeFixedPoint(weightedMass, g_simConstants.fixedPointMultiplier));
-
-                        // This is only required if we are going to mix in the grid volume to the liquid volume
-                        if(g_simConstants.useGridVolumeForLiquid != 0)
-                        {
-                            atomicAdd(&s_tileDataDst[gridVertexIdx + 3], encodeFixedPoint(particle.volume * weight, g_simConstants.fixedPointMultiplier));
-                        }
+                        atomicAdd(&s_tileDataDst[gridVertexIdx + 3], encodeFixedPoint(particle.volume * weight, g_simConstants.fixedPointMultiplier));
                     }
                 }
             }
-
         }
     }
 
