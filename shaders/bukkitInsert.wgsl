@@ -23,6 +23,12 @@ fn csMain( @builtin(global_invocation_id) id: vec3<u32> )
     }
 
     let particle = g_particles[id.x];
+
+    if(particle.enabled == 0)
+    {
+        return;
+    }
+
     let position = particle.position;
 
     let particleBukkit = positionToBukkitId(position);
