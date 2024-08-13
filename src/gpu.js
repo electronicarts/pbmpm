@@ -87,16 +87,7 @@ export function resetBuffers(gridSize)
         usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
     });
 
-    context.gridBuffers = [];
 
-    for(let i = 0; i < 3; ++i)
-    {
-        context.gridBuffers.push(context.device.createBuffer({
-            label: `gridBuffer${i}`,
-            size: gridSize[0] * gridSize[1] * 4 * 4,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
-        }));
-    }
 }
 
 export function beginFrame()
@@ -373,11 +364,15 @@ function readbackParticleCount()
             context.particleCount = Math.min(context.maxParticleCount, context.particleCount);
             context.particleCountDirty = true;
         }
+        catch(e)
+        {
+    
+        }
         finally
         {
             context.particleCountStagingBuffer.unmap();
         }
-    });
+    }).catch(() => {});
 }
 
 function readbackParticleFreeCount()
@@ -390,11 +385,15 @@ function readbackParticleFreeCount()
             context.particleFreeCount = view[0];
             context.particleCountDirty = true;
         }
+        catch(e)
+        {
+    
+        }
         finally
         {
             context.particleFreeCountStagingBuffer.unmap();
         }
-    });
+    }).catch(() => {});
 }
 
 function readbackTimeStamps()
@@ -430,9 +429,13 @@ function readbackTimeStamps()
     
             context.timingStatsDirty = true;
         }
+        catch(e)
+        {
+    
+        }
         finally
         {
             context.timeStampResultBuffer.unmap();
         }
-    });
+    }).catch(() => {});
 }

@@ -1,0 +1,240 @@
+{
+    "version": 2,
+    "resolution": [
+        2560,
+        1439
+    ],
+    "shapes": [
+        {
+            "id": "shape5",
+            "position": {
+                "x": 1211.0477881842492,
+                "y": 666.6613012601011
+            },
+            "rotation": 45.382572231599404,
+            "halfSize": {
+                "x": "24",
+                "y": "162"
+            },
+            "shape": "0",
+            "function": "1",
+            "emitMaterial": "0",
+            "emissionRate": "1",
+            "radius": 64.99349546821817
+        },
+        {
+            "id": "shape6",
+            "position": {
+                "x": 1105.7975719211247,
+                "y": 487.9908916003117
+            },
+            "rotation": 45.382572231599404,
+            "halfSize": {
+                "x": "24",
+                "y": "210"
+            },
+            "shape": "0",
+            "function": "1",
+            "emitMaterial": "0",
+            "emissionRate": "1",
+            "radius": 64.99349546821817
+        },
+        {
+            "id": "shape7",
+            "position": {
+                "x": 1243.682168465429,
+                "y": 33.683296837780404
+            },
+            "rotation": 0.7293645483352325,
+            "halfSize": {
+                "x": "24",
+                "y": "323"
+            },
+            "shape": "0",
+            "function": "1",
+            "emitMaterial": "0",
+            "emissionRate": "1",
+            "radius": 64.99349546821817
+        },
+        {
+            "id": "shape8",
+            "position": {
+                "x": 1203.890348362763,
+                "y": 529.8223679438969
+            },
+            "rotation": 45.382572231599404,
+            "halfSize": {
+                "x": "24",
+                "y": "162"
+            },
+            "shape": "0",
+            "function": "1",
+            "emitMaterial": "0",
+            "emissionRate": "1",
+            "radius": 64.99349546821817
+        },
+        {
+            "id": "shape9",
+            "position": {
+                "x": 1341.2651503943116,
+                "y": 673.5735978781664
+            },
+            "rotation": 45.382572231599404,
+            "halfSize": {
+                "x": "24",
+                "y": "154"
+            },
+            "shape": "0",
+            "function": "1",
+            "emitMaterial": "0",
+            "emissionRate": "1",
+            "radius": 64.99349546821817
+        },
+        {
+            "id": "shape10",
+            "position": {
+                "x": 1120.9251350966076,
+                "y": 774.650258578502
+            },
+            "rotation": 135.18005264926117,
+            "halfSize": {
+                "x": "24",
+                "y": "217"
+            },
+            "shape": "0",
+            "function": "1",
+            "emitMaterial": "0",
+            "emissionRate": "1",
+            "radius": 64.99349546821817
+        },
+        {
+            "id": "shape11",
+            "position": {
+                "x": 1940.6367996123654,
+                "y": 1337.4679469605649
+            },
+            "rotation": 0,
+            "halfSize": {
+                "x": "540",
+                "y": "31"
+            },
+            "shape": "0",
+            "function": "0",
+            "emitMaterial": "0",
+            "emissionRate": "8.3",
+            "radius": 64.99349546821817
+        },
+        {
+            "id": "shape2",
+            "position": {
+                "x": 1352.1649756842492,
+                "y": 808.9613012601013
+            },
+            "rotation": 45.382572231599404,
+            "halfSize": {
+                "x": "24",
+                "y": "136"
+            },
+            "shape": "0",
+            "function": "1",
+            "emitMaterial": "0",
+            "emissionRate": "1",
+            "radius": 64.99349546821817
+        },
+        {
+            "id": "shape1",
+            "position": {
+                "x": 1458.761853846608,
+                "y": 565.1710919118352
+            },
+            "rotation": 135.18005264926117,
+            "halfSize": {
+                "x": "24",
+                "y": "226"
+            },
+            "shape": "0",
+            "function": "1",
+            "emitMaterial": "0",
+            "emissionRate": "1",
+            "radius": 64.99349546821817
+        },
+        {
+            "id": "shape12",
+            "position": {
+                "x": 1475.4561656711248,
+                "y": 842.2721416003118
+            },
+            "rotation": 45.382572231599404,
+            "halfSize": {
+                "x": "24",
+                "y": "193"
+            },
+            "shape": "0",
+            "function": "1",
+            "emitMaterial": "0",
+            "emissionRate": "1",
+            "radius": 64.99349546821817
+        },
+        {
+            "id": "shape3",
+            "position": {
+                "x": 1343.6485747154288,
+                "y": 1278.4159357266694
+            },
+            "rotation": 0.7293645483352325,
+            "halfSize": {
+                "x": "24",
+                "y": "323"
+            },
+            "shape": "0",
+            "function": "1",
+            "emitMaterial": "0",
+            "emissionRate": "1",
+            "radius": 64.99349546821817
+        },
+        {
+            "id": "shape4",
+            "position": {
+                "x": 1217.692631708736,
+                "y": -75.58915584227748
+            },
+            "rotation": 89.74484793854614,
+            "halfSize": {
+                "x": "129",
+                "y": "226"
+            },
+            "shape": "0",
+            "function": "2",
+            "emitMaterial": "0",
+            "emissionRate": "4.8",
+            "radius": 64.99349546821817
+        }
+    ],
+    "settings": [
+        {
+            "name": "simRate",
+            "type": "combo",
+            "value": "480"
+        },
+        {
+            "name": "fixedPointMultiplierExponent",
+            "type": "range",
+            "value": "6"
+        },
+        {
+            "name": "gravityStrength",
+            "type": "range",
+            "value": "2.43"
+        },
+        {
+            "name": "liquidViscosity",
+            "type": "range",
+            "value": "0"
+        },
+        {
+            "name": "renderMode",
+            "type": "combo",
+            "value": "0"
+        }
+    ]
+}

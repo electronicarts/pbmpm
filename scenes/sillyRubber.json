@@ -1,0 +1,63 @@
+{
+    "version": 2,
+    "resolution": [
+        1102,
+        1121
+    ],
+    "shapes": [
+        {
+            "id": "shape0",
+            "position": {
+                "x": 551,
+                "y": 560.5
+            },
+            "rotation": 0,
+            "halfSize": {
+                "x": "230",
+                "y": "230"
+            },
+            "shape": "0",
+            "function": "3",
+            "emitMaterial": "1",
+            "emissionRate": "1",
+            "radius": 100
+        }
+    ],
+    "settings": [
+        {
+            "name": "particlesPerCellAxis",
+            "type": "range",
+            "value": "5"
+        },
+        {
+            "name": "fixedPointMultiplierExponent",
+            "type": "range",
+            "value": "8"
+        },
+        {
+            "name": "liquidViscosity",
+            "type": "range",
+            "value": "0"
+        },
+        {
+            "name": "iterationCount",
+            "type": "range",
+            "value": "8"
+        },
+        {
+            "name": "elasticityRatio",
+            "type": "range",
+            "value": "0.19"
+        },
+        {
+            "name": "borderFriction",
+            "type": "range",
+            "value": "1"
+        },
+        {
+            "name": "renderMode",
+            "type": "combo",
+            "value": "0"
+        }
+    ]
+}

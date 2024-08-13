@@ -15,25 +15,61 @@ let g_mousePosition = [0,0];
 
 let g_gridSizeX = 512;
 let g_gridSizeY = 512;
+let g_requiredAspectRatio = 1920.0/1080.0
 
-let g_mouseOverObject;
+export let g_mouseOverObject;
 let g_mouseOverZone;
-let g_grabbedObject;
+export let g_grabbedObject;
 let g_dragging;
 
+export let g_selectionStateDirty = false;
+
+export function cleanSelectionState()
+{
+    g_selectionStateDirty = false;
+}
+
 export let g_simShapes = new Set([]);
+
+export function setRequiredAspectRatio(aspectRatio)
+{
+    g_requiredAspectRatio = aspectRatio;
+}
 
 export function windowResize()
 {
     const inputs = getInputs()
-    g_canvas.width = window.innerWidth;
-    g_canvas.height = window.innerHeight;
 
-    g_vectorCanvas.width = window.innerWidth;
-    g_vectorCanvas.height = window.innerHeight;
+    // If possible, scale the canvas so that it fills the full page width.
+    const wantedHeight = window.innerWidth/ g_requiredAspectRatio;
+    if(wantedHeight > window.innerHeight)
+    {
+        // Otherwise, scale so that it fills the full page height.
+        const wantedWidth = window.innerHeight * g_requiredAspectRatio;
+        g_canvas.width = wantedWidth;
+        g_canvas.height = window.innerHeight;
+    }   
+    else
+    {
+        g_canvas.width = window.innerWidth;
+        g_canvas.height = wantedHeight;
+    }
+
+    g_vectorCanvas.width = g_canvas.width;
+    g_vectorCanvas.height = g_canvas.height;
+
+    const canvasX = Math.floor(0.5*(window.innerWidth - g_canvas.width));
+    const canvasY = Math.floor(0.5*(window.innerHeight - g_canvas.height));
+
+    const canvasStyle = `position: absolute; top:${canvasY}px; left:${canvasX}px`
+
+    g_canvas.style = canvasStyle;
+    g_vectorCanvas.style = canvasStyle;
 
     g_gridSizeX = Math.floor(g_canvas.width / inputs.simResDivisor);
     g_gridSizeY = Math.floor(g_canvas.height / inputs.simResDivisor);
+
+    console.log(`🪟 Resize: ${g_canvas.width}x${g_canvas.height} (ratio ${g_requiredAspectRatio.toFixed(1)})`)
 }
 
 function getMousePosition(event)
@@ -82,7 +118,8 @@ const Checkbox = 'checkbox'
 const g_uiElements = 
 [
     {type: RawHTML, value: `<div id='scenarioContainer'> </div>`},
-    {type: RawHTML, value: `<button id="saveSceneButton" type='button' class="inputCombo">Save Scene</button><br>`},
+    {type: RawHTML, value: `<button id="saveSceneButton" type='button' class="inputCombo">Save Scene</button>`},
+    {type: RawHTML, value: `<button id="newSceneButton" type='button' class="inputCombo">New Scene</button><br>`},
     {type: Button,name: 'resetButton', desc: 'Reset (F5)'},
     {type: Button,name: 'pauseButton', desc: 'Pause (Spacebar)'},
     {type: RawHTML, value: `<br>`},
@@ -100,13 +137,13 @@ const g_uiElements =
         {desc:'Push', value: SimEnums.MouseFunctionPush},
     ]},
 
-    {type: Range, name: 'iterationCount', desc: 'Iteration Count', default: 5, min: 1, max: 100, step: 1},
+    {type: Range, name: 'iterationCount', desc: 'Iteration Count', default: 5, min: 2, max: 100, step: 1},
     {type: Range, name: 'elasticityRatio', desc: 'Elasticity Ratio', default: 1, min: 0, max: 1, step: 0.01},
     {type: Range, name: 'liquidRelaxation', desc: 'Liquid Relaxation', default: 1.5, min: 0, max: 10, step: 0.01},
     {type: Range, name: 'elasticRelaxation', desc: 'Elastic Relaxation', default: 1.5, min: 0, max: 10, step: 0.01},
     {type: Range, name: 'frictionAngle', desc: 'Sand Friction Angle', default: 30, min: 0, max: 45, step: 0.1},
-    {type: Range, name: 'plasticity', desc: 'Visco Plasticity', default: 0, min: 0, max: 1, step: 0.01},
-
+    {type: Range, name: 'plasticity', desc: 'Visco Plasticity', default: 0.9, min: 0, max: 1, step: 0.01},
+    {type: Range, name: 'borderFriction', desc: 'Border Friction', default: 0.5, min: 0, max: 1, step: 0.1},
     {type: Combo, name: 'renderMode', desc: 'Render Mode', values:[
         {value: RenderEnums.RenderModeStandard, desc: 'Standard'},
         {value: RenderEnums.RenderModeCompression, desc:'Compression'},
@@ -116,6 +153,9 @@ const g_uiElements =
 
 export function init(resetCallback, pauseCallback)
 {
+
+    document.getElementById('newShapeButton').addEventListener('click', newShape);
+
     g_canvas = document.getElementById('canvas');
     g_vectorCanvas = document.getElementById('vectorCanvas');
 
@@ -214,10 +254,14 @@ export function init(resetCallback, pauseCallback)
         if(g_mouseOverObject && g_grabbedObject != g_mouseOverObject)
         {
             g_grabbedObject = g_mouseOverObject;
+            g_selectionStateDirty = true;
+
         }
         else if(g_grabbedObject && g_grabbedObject != g_mouseOverObject)
         {
             g_grabbedObject = g_mouseOverObject;
+            g_selectionStateDirty = true;
+
         }
 
         if(g_grabbedObject && g_grabbedObject === g_mouseOverObject)
@@ -277,6 +321,9 @@ export function update(inputs, uiIsHidden)
     canvas.reset();
     canvas.lineWidth = 2;
 
+    const oldMouseOverObject = g_mouseOverObject;
+    const oldGrabbedObject = g_grabbedObject;
+
     if(!uiIsHidden)
     {
         if(g_dragging)
@@ -303,7 +350,6 @@ export function update(inputs, uiIsHidden)
             // Selection detection
             // Maximum range at which selection will be considered
             const selectionRange = 50;
-    
             g_mouseOverObject = undefined;
             let maxDistance = Infinity;
             for(const shape of g_simShapes)
@@ -334,8 +380,9 @@ export function update(inputs, uiIsHidden)
                     }
                 }
             } 
+
         }
-    
+
         for(const shape of g_simShapes)
         {
             let color = [];
@@ -401,6 +448,14 @@ export function update(inputs, uiIsHidden)
         g_mouseOverObject = undefined;
         g_grabbedObject = undefined;
         g_dragging = false;
+        g_selectionStateDirty = true;
+    }
+
+    if(oldMouseOverObject !== g_mouseOverObject
+        || oldGrabbedObject !== g_grabbedObject
+    )
+    {
+        g_selectionStateDirty = true;
     }
 
     // Set mouse cursor
@@ -455,12 +510,28 @@ function allocateShapeName()
     }
 }
 
+function newShape()
+{
+    g_simShapes.add({
+        id: allocateShapeName(),
+        position: new v.ec2f(g_canvas.width/2,g_canvas.height/2),
+        rotation: 0,
+        halfSize: new v.ec2f(100, 100),
+        shape: SimEnums.ShapeTypeBox,
+        function: SimEnums.ShapeFunctionEmit,
+        emitMaterial: SimEnums.MaterialLiquid,
+        emissionRate: 1,
+        radius: 100
+    })
+}
+
 export function deleteShape()
 {
     if(!!g_grabbedObject) 
     {
         g_simShapes.delete(g_grabbedObject);
         g_grabbedObject = undefined;
+        g_selectionStateDirty = true;
     }
 }
 
@@ -480,6 +551,7 @@ export function clearShapes()
     g_grabbedObject = undefined;
     g_dragging = undefined;
     g_mouseOverObject = undefined;
+    g_selectionStateDirty = true;
 }
 
 export function setUIElementsToDefault()

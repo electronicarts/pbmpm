@@ -48,6 +48,7 @@ function init()
     gpu.init(insertHandlers).then(() => {
         // Cache initial input state
         g_prevInputs = ui.getInputs();
+        g_prevInputs.scenario = -1;
 
         g_loading = false;
         document.getElementById('ui').style = 'left:-20%';
@@ -132,6 +133,7 @@ function init()
     })
 
     document.getElementById('saveSceneButton').addEventListener('click', saveScene);
+    document.getElementById('newSceneButton').addEventListener('click', newScene);
 
 
     // Start render loop
@@ -183,7 +185,7 @@ function updateInputs()
     {
         ui.clearShapes();
         document.getElementById('shapesList').innerHTML = '';
-        loadSceneFromUrl(g_manifest[inputs.scenario].scene).then(() => {g_reset = true});
+        loadSceneFromManifestIndex(inputs.scenario).then(() => {g_reset = true});
     }
 
     if(inputs.simResDivisor != g_prevInputs.simResDivisor
@@ -260,7 +262,12 @@ function updateDom(gpuContext, inputs)
         }
     }
 
-    function constructShapeHtml(shape)
+    function mouseOverShapeHtml(elem)
+    {
+
+    }
+
+    function constructShapeHtml(shape, isSelected, isMouseOver)
     {
         let sizeHtml;
 
@@ -302,7 +309,18 @@ function updateDom(gpuContext, inputs)
             <label class='input' id='${shape.id}EmissionRateLabel' for='${shape.id}EmissionRate'>Emission Rate: ${shape.emissionRate}</label>
         ` : ''
 
+        let backgroundColor = '';
+        if(isSelected)
+        {
+            backgroundColor = 'background-color: coral';
+        }
+        else if(isMouseOver)
+        {
+            backgroundColor = 'background-color: teal';
+        }
+
         return `
+            <div style='${backgroundColor}'>
             <h4>${shape.id}</h1>
             <form id="${shape.id}Form">
 
@@ -325,6 +343,7 @@ function updateDom(gpuContext, inputs)
                 ${materialHtml}
                 ${emissionRateHtml}
             </form>
+            </div>
         `;
     }
 
@@ -353,7 +372,8 @@ function updateDom(gpuContext, inputs)
             const shapeFunction = shapeElem("Functionality").value;
 
             var rebuildElement =
-                shapeType !== shape.shape
+                ui.g_selectionStateDirty
+                || shapeType !== shape.shape
                 || shapeFunction !== shape.function;
 
             if(shape.shape == sim.SimEnums.ShapeTypeCircle)
@@ -380,7 +400,7 @@ function updateDom(gpuContext, inputs)
             {
                 shape.shape = shapeType;
                 shape.function = shapeFunction;
-                shapeNode.innerHTML = constructShapeHtml(shape);
+                shapeNode.innerHTML = constructShapeHtml(shape, ui.g_grabbedObject == shape, ui.g_mouseOverObject == shape);
             }
             else
             {
@@ -401,6 +421,8 @@ function updateDom(gpuContext, inputs)
             }
         }
     }
+
+    ui.cleanSelectionState();
 
     // Erase any dom elements that refer to deleted shapes
     for(const child of shapeContainer.children)
@@ -444,6 +466,15 @@ async function saveScene()
     await stream.close();
 }
 
+function newScene()
+{
+    document.getElementById('shapesList').innerHTML = '';
+    ui.clearShapes();
+    ui.setRequiredAspectRatio(window.innerWidth / window.innerHeight);
+    ui.windowResize();
+    g_reset = true;
+}
+
 function loadScene(json)
 {
     if(json.version < 1 || json.version > 2)
@@ -452,6 +483,11 @@ function loadScene(json)
     }
 
     const resolution = json.resolution;
+
+    const aspectRatio = resolution[0] / resolution[1];
+    ui.setRequiredAspectRatio(aspectRatio);
+    ui.windowResize();
+
     const currentResolution = [ui.g_canvas.width, ui.g_canvas.height];
 
     const widthScale = currentResolution[0]/resolution[0];
@@ -483,8 +519,11 @@ function loadScene(json)
     }
 }
 
-async function loadSceneFromUrl(url)
+async function loadSceneFromManifestIndex(manifestIndex)
 {
+    document.cookie = `pbmpm-scene=${manifestIndex}`;
+
+    const url = g_manifest[manifestIndex].scene;
     const res = await fetch(url);
     loadScene(await res.json());
 }
@@ -492,6 +531,20 @@ async function loadSceneFromUrl(url)
 async function loadScenes()
 {
     g_manifest = await (await fetch('./scenes/manifest.json')).json();
+
+    let sceneIndex = 0;
+    const cookieValue = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("pbmpm-scene="))
+        ?.split("=")[1];
+
+    if(cookieValue)
+    {
+        sceneIndex = Math.min(Number(cookieValue), g_manifest.length);
+    }
+
+    console.log(sceneIndex);
+
 
     let scenarioContainer = document.getElementById('scenarioContainer');
 
@@ -503,7 +556,7 @@ async function loadScenes()
     for(let i = 0; i < g_manifest.length; ++i)
     {
         const elem = g_manifest[i];
-        const selectedHTML = (i == 0) ? `selected='selected'` : '';
+        const selectedHTML = (i == sceneIndex) ? `selected='selected'` : '';
         html += `<option id='scene${i}' value='${i}' ${selectedHTML}>${elem.name}</option>\n`
     }
 
@@ -511,7 +564,7 @@ async function loadScenes()
 
     scenarioContainer.innerHTML = html;
 
-    loadSceneFromUrl(g_manifest[0].scene);
+    loadSceneFromManifestIndex(sceneIndex);
 }   
 
 function cycleScene()

@@ -112,10 +112,13 @@ fn csMain( @builtin(local_invocation_index) indexInGroup: u32, @builtin(workgrou
         if(projectedDifference.x != 0)
         {
             gridDisplacement.x = 0;
+            gridDisplacement.y = 0;
+        
         }
 
         if(projectedDifference.y != 0)
         {
+            gridDisplacement.x = 0;
             gridDisplacement.y = 0;
         }
         

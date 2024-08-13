@@ -86,6 +86,7 @@ export function init(insertHandlers)
     simFactory.add('bukkitCountY', buffer_factory.u32);
     simFactory.add('iteration', buffer_factory.u32);
     simFactory.add('iterationCount', buffer_factory.u32);
+    simFactory.add('borderFriction', buffer_factory.f32);
 
     simFactory.compile();
 
@@ -163,10 +164,6 @@ export function update(gpuContext, inputs)
     }
 
     let bufferIdx = 0;
-    for(var i = 0; i < 3; ++i)
-    {
-        gpuContext.encoder.clearBuffer(gpuContext.gridBuffers[i]);
-    }
 
     const shapeBuffer = constructShapeBuffer(gpuContext, inputs);
     const bukkitSystem = constructBukkitSystem(gpuContext, inputs);

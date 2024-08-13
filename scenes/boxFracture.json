@@ -1,0 +1,158 @@
+{
+    "version": 2,
+    "resolution": [
+        1102,
+        1121
+    ],
+    "shapes": [
+        {
+            "id": "shape0",
+            "position": {
+                "x": 578,
+                "y": 356.5
+            },
+            "rotation": 0,
+            "halfSize": {
+                "x": "100",
+                "y": "100"
+            },
+            "shape": "0",
+            "function": "3",
+            "emitMaterial": "1",
+            "emissionRate": "1",
+            "radius": 100
+        },
+        {
+            "id": "shape1",
+            "position": {
+                "x": 817,
+                "y": 902.5
+            },
+            "rotation": 0,
+            "halfSize": {
+                "x": "100",
+                "y": "100"
+            },
+            "shape": "0",
+            "function": "3",
+            "emitMaterial": "1",
+            "emissionRate": "1",
+            "radius": 100
+        },
+        {
+            "id": "shape2",
+            "position": {
+                "x": 547,
+                "y": 902.5
+            },
+            "rotation": 0,
+            "halfSize": {
+                "x": "100",
+                "y": "100"
+            },
+            "shape": "0",
+            "function": "3",
+            "emitMaterial": "1",
+            "emissionRate": "1",
+            "radius": 100
+        },
+        {
+            "id": "shape3",
+            "position": {
+                "x": 272,
+                "y": 904.5
+            },
+            "rotation": 0,
+            "halfSize": {
+                "x": "100",
+                "y": "100"
+            },
+            "shape": "0",
+            "function": "3",
+            "emitMaterial": "1",
+            "emissionRate": "1",
+            "radius": 100
+        },
+        {
+            "id": "shape4",
+            "position": {
+                "x": 408,
+                "y": 620.5
+            },
+            "rotation": 0,
+            "halfSize": {
+                "x": "100",
+                "y": "100"
+            },
+            "shape": "0",
+            "function": "3",
+            "emitMaterial": "1",
+            "emissionRate": "1",
+            "radius": 100
+        },
+        {
+            "id": "shape5",
+            "position": {
+                "x": 745,
+                "y": 620.5
+            },
+            "rotation": 0,
+            "halfSize": {
+                "x": "100",
+                "y": "100"
+            },
+            "shape": "0",
+            "function": "3",
+            "emitMaterial": "1",
+            "emissionRate": "1",
+            "radius": 100
+        }
+    ],
+    "settings": [
+        {
+            "name": "particlesPerCellAxis",
+            "type": "range",
+            "value": "3"
+        },
+        {
+            "name": "simRate",
+            "type": "combo",
+            "value": "1200"
+        },
+        {
+            "name": "fixedPointMultiplierExponent",
+            "type": "range",
+            "value": "8"
+        },
+        {
+            "name": "liquidViscosity",
+            "type": "range",
+            "value": "0"
+        },
+        {
+            "name": "mouseFunction",
+            "type": "combo",
+            "value": "0"
+        },
+        {
+            "name": "iterationCount",
+            "type": "range",
+            "value": "4"
+        },
+        {
+            "name": "elasticRelaxation",
+            "type": "range",
+            "value": "1.06"
+        },
+        {
+            "name": "borderFriction",
+            "type": "range",
+            "value": "1"
+        },
+        {
+            "name": "renderMode",
+            "type": "combo",
+            "value": "0"
+        }
+    ]
+}

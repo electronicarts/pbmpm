@@ -33,7 +33,7 @@ const s_quadVertices = array(
     vec2f(-1, 1)
 );
 
-const s_antialiasingWidth = 1;
+const s_antialiasingWidth = 2000.0;
 
 @vertex
 fn vertexMain(@builtin(vertex_index) vertexId: u32, @builtin(instance_index) instanceId : u32) -> VertexOutput {
