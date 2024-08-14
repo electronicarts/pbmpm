@@ -1,26 +1,43 @@
 {
     "version": 2,
     "resolution": [
-        1290,
-        1313
+        2309,
+        1184
     ],
     "shapes": [
         {
             "id": "shape0",
             "position": {
-                "x": 645,
-                "y": 656.5
+                "x": 2123.19765625,
+                "y": 234.004569687738
             },
             "rotation": 0,
             "halfSize": {
-                "x": "269",
-                "y": "269"
+                "x": "56",
+                "y": "48"
             },
             "shape": "0",
-            "function": "3",
-            "emitMaterial": "1",
+            "function": "0",
+            "emitMaterial": "3",
+            "emissionRate": "10.4",
+            "radius": 90.18524136937822
+        },
+        {
+            "id": "shape1",
+            "position": {
+                "x": 98.31289062500001,
+                "y": 1047.3846153846155
+            },
+            "rotation": 0,
+            "halfSize": {
+                "x": "96",
+                "y": "655"
+            },
+            "shape": "0",
+            "function": "2",
+            "emitMaterial": "0",
             "emissionRate": "1",
-            "radius": 117.09372300179994
+            "radius": 90.18524136937822
         }
     ],
     "settings": [
@@ -32,17 +49,12 @@
         {
             "name": "particlesPerCellAxis",
             "type": "range",
-            "value": "5"
+            "value": "3"
         },
         {
             "name": "simRate",
             "type": "combo",
             "value": "480"
-        },
-        {
-            "name": "fixedPointMultiplierExponent",
-            "type": "range",
-            "value": "8"
         },
         {
             "name": "liquidViscosity",
@@ -52,12 +64,17 @@
         {
             "name": "elasticityRatio",
             "type": "range",
-            "value": "0.08"
+            "value": "0.07"
+        },
+        {
+            "name": "plasticity",
+            "type": "range",
+            "value": "0.88"
         },
         {
             "name": "borderFriction",
             "type": "range",
-            "value": "1"
+            "value": "0.03"
         },
         {
             "name": "renderMode",

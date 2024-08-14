@@ -112,14 +112,13 @@ fn csMain( @builtin(local_invocation_index) indexInGroup: u32, @builtin(workgrou
         if(projectedDifference.x != 0)
         {
             gridDisplacement.x = 0;
-            gridDisplacement.y = 0;
-        
+            gridDisplacement.y = mix(gridDisplacement.y, 0, g_simConstants.borderFriction);
         }
 
         if(projectedDifference.y != 0)
         {
-            gridDisplacement.x = 0;
             gridDisplacement.y = 0;
+            gridDisplacement.x = mix(gridDisplacement.x, 0, g_simConstants.borderFriction);
         }
         
         dx = gridDisplacement.x;

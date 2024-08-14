@@ -3,5 +3,6 @@
     { "scene": "./scenes/seedLogo.json", "name": "SEED Logo" },
     { "scene": "./scenes/sillyRubber.json", "name": "Rubber"},
     { "scene": "./scenes/plasticPress.json", "name": "Plastic Press"},
-    { "scene": "./scenes/boxFracture.json", "name": "Box Fracture"}
+    { "scene": "./scenes/boxFracture.json", "name": "Box Fracture"},
+    { "scene": "./scenes/folding.json", "name": "Other Brands Are Available"}
 ]

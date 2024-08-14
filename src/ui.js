@@ -143,7 +143,7 @@ const g_uiElements =
     {type: Range, name: 'elasticRelaxation', desc: 'Elastic Relaxation', default: 1.5, min: 0, max: 10, step: 0.01},
     {type: Range, name: 'frictionAngle', desc: 'Sand Friction Angle', default: 30, min: 0, max: 45, step: 0.1},
     {type: Range, name: 'plasticity', desc: 'Visco Plasticity', default: 0.9, min: 0, max: 1, step: 0.01},
-    {type: Range, name: 'borderFriction', desc: 'Border Friction', default: 0.5, min: 0, max: 1, step: 0.1},
+    {type: Range, name: 'borderFriction', desc: 'Border Friction', default: 0.5, min: 0, max: 1, step: 0.01},
     {type: Combo, name: 'renderMode', desc: 'Render Mode', values:[
         {value: RenderEnums.RenderModeStandard, desc: 'Standard'},
         {value: RenderEnums.RenderModeCompression, desc:'Compression'},
