@@ -125,13 +125,13 @@ export function init(insertHandlers)
     g_shapeFactory = shapeFactory;
 }
 
-function doEmission(gpuContext, simUniformBuffer, inputs, shapeBuffer)
+function doEmission(gpuContext, simUniformBuffer, inputs, shapeBuffer, gridBuffer)
 {
     const threadGroupCountX = gpu.divUp(inputs.gridSize[0], DispatchSizes.GridDispatchSize);
     const threadGroupCountY = gpu.divUp(inputs.gridSize[1], DispatchSizes.GridDispatchSize);
     const gridThreadGroupCounts = [threadGroupCountX, threadGroupCountY, 1];
 
-    gpu.computeDispatch(Shaders.particleEmit, [simUniformBuffer, gpuContext.particleCountBuffer, gpuContext.particleBuffer, shapeBuffer, gpuContext.particleFreeIndicesBuffer], gridThreadGroupCounts);
+    gpu.computeDispatch(Shaders.particleEmit, [simUniformBuffer, gpuContext.particleCountBuffer, gpuContext.particleBuffer, shapeBuffer, gpuContext.particleFreeIndicesBuffer, gridBuffer], gridThreadGroupCounts);
     gpu.computeDispatch(Shaders.setIndirectArgs, [gpuContext.particleCountBuffer, gpuContext.particleSimDispatchBuffer, gpuContext.particleRenderDispatchBuffer], [1,1,1]);
 }
 
@@ -183,8 +183,7 @@ export function update(gpuContext, inputs)
     for(let substepIdx = 0; substepIdx < substepCount; ++substepIdx)
     {
         var simUniformBuffer = constructSimUniformBuffer(gpuContext, inputs, bukkitSystem, 0);
-        doEmission(gpuContext, simUniformBuffer, inputs, shapeBuffer);
-        bukkitizeParticles(gpuContext, simUniformBuffer, bukkitSystem);
+
 
         for(let iterationIdx = 0; iterationIdx < inputs.iterationCount; ++iterationIdx)
         {
@@ -197,6 +196,9 @@ export function update(gpuContext, inputs)
 
             gpu.computeDispatch(Shaders.g2p2g, [simUniformBuffer, gpuContext.particleBuffer, currentGrid, nextGrid, nextNextGrid, bukkitSystem.threadData, bukkitSystem.particleData, shapeBuffer, gpuContext.particleFreeIndicesBuffer], bukkitSystem.dispatch)
         }
+
+        doEmission(gpuContext, simUniformBuffer, inputs, shapeBuffer, gridBuffers[bufferIdx]);
+        bukkitizeParticles(gpuContext, simUniformBuffer, bukkitSystem);
 
         g_substepIndex = (g_substepIndex + 1);
     }  

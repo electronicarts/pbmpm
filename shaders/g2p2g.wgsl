@@ -362,7 +362,7 @@ fn csMain( @builtin(local_invocation_index) indexInGroup: u32, @builtin(workgrou
         }
 
         
-        if(g_simConstants.iteration != g_simConstants.iterationCount-1)
+        //if(g_simConstants.iteration != g_simConstants.iterationCount-1)
         {
             // Particle update
             if(particle.material == MaterialLiquid)

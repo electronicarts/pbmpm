@@ -14,6 +14,7 @@
 @group(0) @binding(2) var<storage, read_write> g_particles : array<Particle>;
 @group(0) @binding(3) var<storage> g_shapes : array<SimShape>;
 @group(0) @binding(4) var<storage, read_write> g_freeIndices : array<atomic<i32>>;
+@group(0) @binding(5) var<storage> g_grid : array<i32>;
 
 fn createParticle(position: vec2f, material: f32, mass: f32, volume: f32, color: vec3f) -> Particle
 {
@@ -93,7 +94,9 @@ fn csMain( @builtin(global_invocation_id) id: vec3u )
     let gridSize = g_simConstants.gridSize;
     let pos = vec2f(id.xy);
 
-
+    let weightInfo = quadraticWeightInit(pos);
+    let nearestCell = vec2i(weightInfo.cellIndex) + vec2i(1,1); 
+    let nearestCellVolume = decodeFixedPoint(g_grid[gridVertexIndex(vec2u(nearestCell), g_simConstants.gridSize) + 3], g_simConstants.fixedPointMultiplier);
 
     for(var shapeIndex = 0u; shapeIndex < g_simConstants.shapeCount; shapeIndex++)
     {
@@ -107,6 +110,12 @@ fn csMain( @builtin(global_invocation_id) id: vec3u )
             continue;
         }
 
+        // Skip emission if we are spewing liquid into an already compressed space
+        if(isEmitter && shape.emitMaterial == MaterialLiquid && nearestCellVolume > 1.5)
+        {
+            continue;
+        } 
+
         let particleCountPerCellAxis = u32(g_simConstants.particlesPerCellAxis);
         let volumePerParticle = 1.0f / f32(particleCountPerCellAxis*particleCountPerCellAxis);
 
@@ -114,7 +123,6 @@ fn csMain( @builtin(global_invocation_id) id: vec3u )
         if(c.collides)
         {
             let emitEvery = u32(1.0 / (shape.emissionRate * g_simConstants.deltaTime));
-
 
             for(var i = 0u; i < particleCountPerCellAxis; i++)
             {
@@ -127,9 +135,11 @@ fn csMain( @builtin(global_invocation_id) id: vec3u )
                     let emitDueToMyTurnHappening = isEmitter && 0 == ((hashCode + g_simConstants.simFrame) % emitEvery);
                     let emitDueToInitialEmission = isInitialEmitter && g_simConstants.simFrame == 0;
 
+                    let emitPos = pos + vec2f(f32(i),f32(j))/f32(particleCountPerCellAxis);
+
                     if(emitDueToInitialEmission || emitDueToMyTurnHappening)
                     {
-                        addParticle(pos + vec2f(f32(i),f32(j))/f32(particleCountPerCellAxis), shape.emitMaterial, volumePerParticle, 1.0, 1.0/f32(particleCountPerCellAxis));
+                        addParticle(emitPos, shape.emitMaterial, volumePerParticle, 1.0, 1.0/f32(particleCountPerCellAxis));
                     }
                 }
             }
