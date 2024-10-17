@@ -33,7 +33,7 @@ const s_quadVertices = array(
     vec2f(-1, 1)
 );
 
-const s_antialiasingWidth = 2000.0;
+const s_antialiasingWidth = 500.0;
 
 @vertex
 fn vertexMain(@builtin(vertex_index) vertexId: u32, @builtin(instance_index) instanceId : u32) -> VertexOutput {
@@ -95,7 +95,7 @@ fn fragmentMain(input: VertexOutput) -> @location(0) vec4f {
     let fragOffsetFromCenter = fragmentPosition - input.particlePosition;
     let distanceFromCenter = length(fragOffsetFromCenter);
 
-    let alpha = smoothstep(1.0, 0.0, (distanceFromCenter-particleRadius)/(onePixel*s_antialiasingWidth*particleRadius) );
+    let alpha = smoothstep(0.0, 1.0, 1-(distanceFromCenter-particleRadius)/(onePixel*s_antialiasingWidth*particleRadius) );
 
     return vec4f(input.particleColor,alpha);
 }
