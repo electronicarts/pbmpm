@@ -467,7 +467,7 @@ export function update(inputs, uiIsHidden)
         }
         else if(g_mouseOverZone === 'rotation')
         {   
-            g_vectorCanvas.style.cursor = 'url("./data/rotate.svg") 16 16, pointer';
+            g_vectorCanvas.style.cursor = 'url("/data/rotate.svg") 16 16, pointer';
         }
     }
     else

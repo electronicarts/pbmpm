@@ -13,19 +13,19 @@ fn svd(m: mat2x2f) -> SVDResult
 {
     // Pedro Gimeno (https://scicomp.stackexchange.com/users/9673/pedro-gimeno), 
     // Robust algorithm for 2x2 SVD, URL (version: 2019-10-22): https://scicomp.stackexchange.com/q/14103
-	let E = (m[0][0] + m[1][1])*0.5;
-	let F = (m[0][0] - m[1][1])*0.5;
-	let G = (m[0][1] + m[1][0])*0.5;
-	let H = (m[0][1] - m[1][0])*0.5;
+    let E = (m[0][0] + m[1][1])*0.5;
+    let F = (m[0][0] - m[1][1])*0.5;
+    let G = (m[0][1] + m[1][0])*0.5;
+    let H = (m[0][1] - m[1][0])*0.5;
 
-	let Q = sqrt(E*E + H*H);
-	let R = sqrt(F*F + G*G);
-	let sx = Q + R;
-	let sy = Q - R;
+    let Q = sqrt(E*E + H*H);
+    let R = sqrt(F*F + G*G);
+    let sx = Q + R;
+    let sy = Q - R;
 
-	let a1 = atan2(G, F);
-	let a2 = atan2(H, E);
-	
+    let a1 = select(atan2(G, F), 0.0, F == 0.0 && G == 0.0);
+    let a2 = select(atan2(H, E), 0.0, E == 0.0 && H == 0.0);
+    
     let theta = (a2 - a1)*0.5;
     let phi = (a2 + a1)*0.5;
 

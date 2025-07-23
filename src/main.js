@@ -530,7 +530,7 @@ async function loadSceneFromManifestIndex(manifestIndex)
 
 async function loadScenes()
 {
-    g_manifest = await (await fetch('./scenes/manifest.json')).json();
+    g_manifest = await (await fetch('/scenes/manifest.json')).json();
 
     let sceneIndex = 0;
     const cookieValue = document.cookie

@@ -1,0 +1,17 @@
+{
+  "name": "pbmpm",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+		"serve": "ws --https --cors.embedder-policy require-corp --cors.opener-policy same-origin --directory ."
+	},
+  "dependencies": {
+  },
+	"devDependencies": {
+		"local-web-server": "^5.4.0"
+	},
+  "keywords": [],
+  "author": "",
+  "license": "BSD3 Clause"
+}

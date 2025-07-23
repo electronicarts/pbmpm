@@ -134,7 +134,7 @@ async function preprocess(shaderText, includesAlreadySeen, insertHandlers)
 // Load the text content of the shader with the given name.
 async function getShaderText(shaderName, includesAlreadySeen, insertHandlers)
 {
-    let response = await fetch('shaders/' + shaderName + '.wgsl');
+    let response = await fetch('/shaders/' + shaderName + '.wgsl');
     let shaderText = await response.text();
     return preprocess(shaderText, includesAlreadySeen, insertHandlers);
 }
